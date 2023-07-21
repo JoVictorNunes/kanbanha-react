@@ -6,8 +6,8 @@ import AuthProvider from "./contexts/auth/provider.tsx";
 import SocketProvider from "./contexts/socket/provider.tsx";
 import ProjectsProvider from "./contexts/projects/provider.tsx";
 import TeamsProvider from "./contexts/teams/provider.tsx";
-import MemberProvider from "./contexts/members/provider.tsx";
-import TaskProvider from "./contexts/tasks/provider.tsx";
+import MembersProvider from "./contexts/members/provider.tsx";
+import TasksProvider from "./contexts/tasks/provider.tsx";
 import Login from "./components/login/component.tsx";
 import Home from "./components/home/component.tsx";
 import authLoader from "./contexts/auth/loader.ts";
@@ -24,11 +24,11 @@ const router = createBrowserRouter([
         <SocketProvider>
           <ProjectsProvider>
             <TeamsProvider>
-              <MemberProvider>
-                <TaskProvider>
+              <MembersProvider>
+                <TasksProvider>
                   <App />
-                </TaskProvider>
-              </MemberProvider>
+                </TasksProvider>
+              </MembersProvider>
             </TeamsProvider>
           </ProjectsProvider>
         </SocketProvider>

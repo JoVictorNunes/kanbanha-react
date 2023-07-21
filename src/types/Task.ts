@@ -1,14 +1,14 @@
 import { TASK_STATUSES } from "../utils/enums";
 
 export type Task = {
-  createdAt: number;
-  date: number;
+  createdAt: string;
+  date: string;
   description: string;
-  finishedAt: number | null;
+  finishedAt: string | null;
   id: string;
-  inDevelopmentAt: number | null;
-  predictedDate: string;
-  responsible: string | null;
+  inDevelopmentAt: string | null;
+  dueDate: string;
+  assignees: string[];
   status: Lowercase<keyof typeof TASK_STATUSES>;
   teamId: string;
 };

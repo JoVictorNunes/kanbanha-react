@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import TaskContext from "./context";
 import { useSocket } from "../../hooks";
 import { Task } from "../../types";
@@ -7,23 +7,32 @@ interface Props {
   children: React.ReactNode;
 }
 
-const TaskProvider: React.FC<Props> = (props) => {
+const TasksProvider: React.FC<Props> = (props) => {
   const { children } = props;
-  const socket = useSocket();
+  const { socket, connected } = useSocket();
   const [tasks, setTasks] = useState<Array<Task>>([]);
+  const isInititalTasksRead = useRef(false);
 
   useEffect(() => {
-    if (!socket) return;
+    if (!connected || !socket) return;
     const onCreate = (task: Task) => {
       setTasks([...tasks, task]);
     };
-    socket.on("task:create", onCreate);
+    socket.on("tasks:create", onCreate);
     return () => {
-      socket.off("task:create", onCreate);
+      socket.off("tasks:create", onCreate);
     };
-  }, [socket, tasks]);
+  }, [connected, socket, tasks]);
+
+  useEffect(() => {
+    if (!connected || !socket || isInititalTasksRead.current) return;
+    socket.emit("tasks:read", (tasks: Array<Task>) => {
+      setTasks(tasks);
+      isInititalTasksRead.current = true;
+    });
+  }, [connected, socket]);
 
   return <TaskContext.Provider value={tasks}>{children}</TaskContext.Provider>;
 };
 
-export default TaskProvider;
+export default TasksProvider;

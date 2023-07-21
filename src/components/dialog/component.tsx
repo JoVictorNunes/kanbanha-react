@@ -8,6 +8,8 @@ interface Props {
   title: string;
   description: string;
   triggerText: string;
+  triggerClassName: string;
+  icon?: React.ReactNode;
 }
 
 const Dialog: React.FC<Props> = (props) => {
@@ -18,11 +20,14 @@ const Dialog: React.FC<Props> = (props) => {
     description,
     title,
     triggerText,
+    triggerClassName,
+    icon,
   } = props;
   return (
     <D.Root open={open} onOpenChange={onOpenChange}>
       <D.Trigger asChild>
-        <button className="py-2 p-6 bg-blue-700 text-white rounded-md">
+        <button className={triggerClassName}>
+          {icon}
           {triggerText}
         </button>
       </D.Trigger>

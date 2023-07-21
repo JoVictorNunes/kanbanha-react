@@ -10,13 +10,15 @@ import {
   useSocket,
   useTeams,
 } from "../../hooks";
+import MemberCard from "../members/member-card/component";
+import styles from './styles.module.css'
 
 type SelectValue = MultiValue<{ value: string; label: string }>;
 
 const Project: React.FC = () => {
   const { projectId } = useParams();
   const { currentMember } = useAuth();
-  const socket = useSocket();
+  const { socket } = useSocket();
   const projects = useProjects();
   const teams = useTeams();
   const members = useMembers();
@@ -77,18 +79,23 @@ const Project: React.FC = () => {
   };
 
   return (
-    <div className="w-full p-6">
-      <div className="flex pb-6">
-        <div className="grow shrink text-xl font-medium">
-          <span>{project?.name}</span>
+    <div className={`w-full p-6 ${styles.root}`}>
+      <div className="flex pb-6 gap-4">
+        <div className="grow font-medium flex flex-col">
+          <div className="text-lg mb-2">{project?.name}</div>
+          <div className="w-full">
+            <div className="h-[4px] bg-blue-600 w-2/4 rounded"></div>
+          </div>
+          <div className="text-center text-xs text-gray-500">20% complete</div>
         </div>
-        <div className="grow shrink flex justify-end">
+        <div className="flex flex-col justify-center">
           <Dialog
             open={isNewTeamDialogOpen}
             onOpenChange={setIsNewTeamDialogOpen}
             description={`Create a new team for the ${project?.name} project.`}
             title="Create New Team"
-            triggerText="Create New Team"
+            triggerText="Create Team"
+            triggerClassName="bg-blue-600 text-white rounded px-4 py-2"
           >
             {renderCreateTeamForm()}
           </Dialog>
@@ -109,7 +116,16 @@ const Project: React.FC = () => {
             Teams
           </Tabs.Trigger>
         </Tabs.List>
-        <Tabs.Content value="tab1">Overview</Tabs.Content>
+        <Tabs.Content value="tab1" className="py-2 flex flex-col gap-4">
+          <div>
+            <div className="text-xs text-gray-500 font-bold">Name</div>
+            <div>{project?.name}</div>
+          </div>
+          <div>
+            <div className="text-xs text-gray-500 font-bold">Owner</div>
+            <MemberCard memberId={project?.ownerId as string} />
+          </div>
+        </Tabs.Content>
         <Tabs.Content value="tab2">
           <div>
             {teamsOnTheProject.map((t) => {

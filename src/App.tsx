@@ -1,11 +1,13 @@
 import { Outlet } from 'react-router-dom'
 import "./App.css";
 import Sidebar from './components/sidebar/component';
+import Topbar from './components/topbar/component';
 
 function App() {
   return (
-    <div className={`flex h-full`}>
+    <div className={`h-full root`}>
       <Sidebar />
+      <Topbar />
       <Outlet />
     </div>
   );

@@ -9,12 +9,12 @@ interface Props {
 
 const TeamsProvider: React.FC<Props> = (props) => {
   const { children } = props;
-  const socket = useSocket();
+  const { socket, connected } = useSocket();
   const [teams, setTeams] = useState<Array<Team>>([]);
   const isInititalTeamsRead = useRef(false);
 
   useEffect(() => {
-    if (!socket) return;
+    if (!connected || !socket) return;
     const onCreate = (team: Team) => {
       setTeams([...teams, team]);
     };
@@ -22,15 +22,15 @@ const TeamsProvider: React.FC<Props> = (props) => {
     return () => {
       socket.off("teams:create", onCreate);
     };
-  }, [socket, teams]);
+  }, [connected, socket, teams]);
 
   useEffect(() => {
-    if (!socket || isInititalTeamsRead.current) return;
-    socket.emit("teams:read", (t: Array<Team>) => {
-      setTeams(t);
+    if (!connected || !socket || isInititalTeamsRead.current) return;
+    socket.emit("teams:read", (teams: Array<Team>) => {
+      setTeams(teams);
       isInititalTeamsRead.current = true;
     });
-  }, [socket]);
+  }, [connected, socket]);
 
   return (
     <TeamsContext.Provider value={teams}>{children}</TeamsContext.Provider>

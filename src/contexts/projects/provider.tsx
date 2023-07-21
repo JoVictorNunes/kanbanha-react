@@ -9,28 +9,36 @@ interface Props {
 
 const ProjectsProvider: React.FC<Props> = (props) => {
   const { children } = props;
-  const socket = useSocket();
+  const { socket, connected } = useSocket();
   const [projects, setProjects] = useState<Array<Project>>([]);
   const isInititalProjectsRead = useRef(false);
 
   useEffect(() => {
-    if (!socket) return;
+    if (!connected || !socket) return;
     const onCreate = (project: Project) => {
       setProjects([...projects, project]);
     };
+    const onDelete = (projectId: string) => {
+      const projectsFiltered = projects.filter(
+        (project) => project.id !== projectId
+      );
+      setProjects(projectsFiltered);
+    };
     socket.on("projects:create", onCreate);
+    socket.on("projects:delete", onDelete);
     return () => {
       socket.off("projects:create", onCreate);
+      socket.off("projects:delete", onDelete);
     };
-  }, [socket, projects]);
+  }, [connected, socket, projects]);
 
   useEffect(() => {
-    if (!socket || isInititalProjectsRead.current) return;
-    socket.emit("projects:read", (p: Array<Project>) => {
-      setProjects(p);
+    if (!connected || !socket || isInititalProjectsRead.current) return;
+    socket.emit("projects:read", (projects: Array<Project>) => {
+      setProjects(projects);
       isInititalProjectsRead.current = true;
     });
-  }, [socket]);
+  }, [connected, socket]);
 
   return (
     <ProjectsContext.Provider value={projects}>

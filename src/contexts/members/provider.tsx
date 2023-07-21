@@ -7,14 +7,14 @@ interface Props {
   children: React.ReactNode;
 }
 
-const MemberProvider: React.FC<Props> = (props) => {
+const MembersProvider: React.FC<Props> = (props) => {
   const { children } = props;
-  const socket = useSocket();
+  const { socket, connected } = useSocket();
   const [members, setMembers] = useState<Array<Member>>([]);
   const isInititalMembersRead = useRef(false);
 
   useEffect(() => {
-    if (!socket) return;
+    if (!connected || !socket) return;
     const onCreate = (member: Member) => {
       setMembers([...members, member]);
     };
@@ -22,19 +22,19 @@ const MemberProvider: React.FC<Props> = (props) => {
     return () => {
       socket.off("members:create", onCreate);
     };
-  }, [socket, members]);
+  }, [connected, socket, members]);
 
   useEffect(() => {
-    if (!socket || isInititalMembersRead.current) return;
-    socket.emit("members:read", (m: Array<Member>) => {
-      setMembers(m);
+    if (!connected || !socket || isInititalMembersRead.current) return;
+    socket.emit("members:read", (members: Array<Member>) => {
+      setMembers(members);
       isInititalMembersRead.current = true;
     });
-  }, [socket]);
+  }, [connected, socket]);
 
   return (
     <MemberContext.Provider value={members}>{children}</MemberContext.Provider>
   );
 };
 
-export default MemberProvider;
+export default MembersProvider;

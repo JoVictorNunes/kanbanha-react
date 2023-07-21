@@ -1,11 +1,12 @@
 import React, { SyntheticEvent, useRef } from "react";
 import { NavLink } from "react-router-dom";
 import * as Dialog from "@radix-ui/react-dialog";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { useAuth, useProjects, useSocket } from "../../hooks";
 
 const Projects: React.FC = () => {
   const projects = useProjects();
-  const socket = useSocket();
+  const { socket } = useSocket();
   const { currentMember } = useAuth();
   const nameRef = useRef<HTMLInputElement>(null);
   const projectsIOwn = projects.filter((p) => p.ownerId === currentMember?.id);
@@ -65,27 +66,47 @@ const Projects: React.FC = () => {
                       {p.name}
                     </span>
                   </NavLink>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
-                    className="p-2 rounded-full hover:bg-gray-100"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-6 h-6"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z"
-                      />
-                    </svg>
-                  </button>
+                  <DropdownMenu.Root>
+                    <DropdownMenu.Trigger asChild>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                        className="outline-none border-none bg-transparent p-2 rounded-full hover:bg-gray-200 h-fit focus:shadow-[0px_0px_0px_2px] focus:shadow-blue-600"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="w-6 h-6"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z"
+                          />
+                        </svg>
+                      </button>
+                    </DropdownMenu.Trigger>
+
+                    <DropdownMenu.Portal>
+                      <DropdownMenu.Content className="bg-white min-w-[220px] shadow shadow-gray-400 rounded overflow-hidden">
+                        <DropdownMenu.Item className="outline-none p-2 data-[highlighted]:bg-blue-600 data-[highlighted]:text-white">
+                          Edit
+                        </DropdownMenu.Item>
+                        {/* <DropdownMenu.Separator className="h-[1px] bg-gray-300 m-2" /> */}
+                        <DropdownMenu.Group>
+                          <DropdownMenu.Item className="outline-none p-2 text-red-600 data-[highlighted]:bg-red-100">
+                            Delete
+                          </DropdownMenu.Item>
+                        </DropdownMenu.Group>
+
+                        <DropdownMenu.Arrow className="fill-gray-900" />
+                      </DropdownMenu.Content>
+                    </DropdownMenu.Portal>
+                  </DropdownMenu.Root>
                 </div>
               );
             })}

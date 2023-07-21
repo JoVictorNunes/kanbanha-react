@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLoaderData } from "react-router-dom";
 import { decodeJwt } from "jose";
-import AuthContext from "./context";
 import type { AuthLoader, Member } from "@/types";
+import AuthContext from "./context";
 
 interface Props {
   children: React.ReactNode;
@@ -25,13 +25,16 @@ const AuthProvider: React.FC<Props> = (props) => {
       setAuthenticating(false);
       setCurrentMember(payload);
       setToken(token);
-    } else if (code === 400) {
+      return;
+    }
+    if (code === 400) {
       localStorage.removeItem("token");
       setAuthenticating(false);
       setAuthenticated(false);
       setCurrentMember(null);
       setToken(null);
       navigate("/login");
+      return;
     }
   }, [code, navigate]);
 

@@ -10,21 +10,31 @@ interface Props {
 const SocketProvider: React.FC<Props> = (props) => {
   const { children } = props;
   const [socket, setSocket] = useState<Socket | null>(null);
+  const [connected, setConnected] = useState(false);
   const { authenticated, token } = useAuth();
 
   useEffect(() => {
-    if (authenticated && token && !socket) {
+    if (authenticated && !socket) {
       const socket = io("http://localhost:3000", {
         auth: {
           token: token,
         },
       });
+      socket.on("connect", () => setConnected(true));
+      socket.on("disconnect", () => setConnected(false));
       setSocket(socket);
     }
   }, [authenticated, token, socket]);
 
   return (
-    <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>
+    <SocketContext.Provider
+      value={{
+        socket,
+        connected,
+      }}
+    >
+      {children}
+    </SocketContext.Provider>
   );
 };
 

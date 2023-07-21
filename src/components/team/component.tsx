@@ -4,18 +4,15 @@ import Select, { MultiValue } from "react-select";
 import * as Tabs from "@radix-ui/react-tabs";
 import Dialog from "../dialog/component";
 import Tasks from "../tasks/component";
-import {
-  useMembers,
-  useProjects,
-  useSocket,
-  useTeams,
-} from "../../hooks";
+import { useMembers, useProjects, useSocket, useTeams } from "../../hooks";
+import MemberCard from "../members/member-card/component";
+import styles from './styles.module.css'
 
 type SelectValue = MultiValue<{ value: string; label: string }>;
 
 const Team: React.FC = () => {
   const { projectId, teamId } = useParams();
-  const socket = useSocket();
+  const { socket } = useSocket();
   const projects = useProjects();
   const teams = useTeams();
   const members = useMembers();
@@ -66,18 +63,23 @@ const Team: React.FC = () => {
   };
 
   return (
-    <div className="w-full flex flex-col">
-      <div className="flex pb-6">
-        <div className="grow shrink text-xl font-medium">
-          <span>{project?.name}</span>&nbsp;/&nbsp;<span>{team?.name}</span>
+    <div className={`w-full flex flex-col p-6 ${styles.root}`}>
+      <div className="flex pb-6 gap-4">
+        <div className="grow font-medium flex flex-col">
+          <div className="text-lg mb-2">{project?.name} / {team?.name}</div>
+          <div className="w-full bg-gray-300 rounded overflow-hidden">
+            <div className="h-[4px] bg-blue-600 w-2/4"></div>
+          </div>
+          <div className="text-center text-xs text-gray-500">20% complete</div>
         </div>
-        <div className="grow shrink flex justify-end">
-          <Dialog
+        <div className="flex flex-col justify-center">
+        <Dialog
             open={isAddMemberDialogOpen}
             onOpenChange={setIsAddMemberDialogOpen}
             title="Add New Member"
             description="Select the new member to add in the team."
-            triggerText="Add New Member"
+            triggerText="Add Member"
+            triggerClassName="bg-blue-600 text-white rounded px-4 py-2"
           >
             {renderAddMembersForm()}
           </Dialog>
@@ -110,13 +112,7 @@ const Team: React.FC = () => {
             {team?.members.map((m) => {
               const member = members.find((n) => n.id === m);
               return (
-                <div className="border-2 border-gray-100 rounded p-3 flex bg-white">
-                  <div className="w-16 h-16 bg-slate-400 rounded-full"></div>
-                  <div>
-                    <div>{member?.name}</div>
-                    <div>{member?.role}</div>
-                  </div>
-                </div>
+                <MemberCard memberId={member?.id as string} />
               );
             })}
           </div>
