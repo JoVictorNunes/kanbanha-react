@@ -25,13 +25,16 @@ const Projects: React.FC = () => {
         <input
           type="text"
           name="name"
-          className="outline-none border-2 border-gray-100 rounded p-2"
+          className="outline-none border-[1px] border-gray-300 rounded-lg p-2"
           ref={nameRef}
+          required
+          max={20}
+          min={3}
         />
       </div>
       <button
         type="submit"
-        className="self-end text-green-800 bg-green-100 hover:bg-green-200 py-1 px-6 rounded font-medium"
+        className="self-end text-blue-700 bg-blue-100 hover:bg-blue-200 py-1 px-6 rounded font-medium"
       >
         Criar
       </button>

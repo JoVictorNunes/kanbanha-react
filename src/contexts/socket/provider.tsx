@@ -19,12 +19,14 @@ const SocketProvider: React.FC<Props> = (props) => {
         auth: {
           token: token,
         },
+        autoConnect: false,
       });
       socket.on("connect", () => setConnected(true));
       socket.on("disconnect", () => setConnected(false));
       setSocket(socket);
     }
   }, [authenticated, token, socket]);
+  console.log(connected)
 
   return (
     <SocketContext.Provider

@@ -7,6 +7,7 @@ export type Task = {
   finishedAt: string | null;
   id: string;
   inDevelopmentAt: string | null;
+  inReviewAt: string | null;
   dueDate: string;
   assignees: string[];
   status: Lowercase<keyof typeof TASK_STATUSES>;

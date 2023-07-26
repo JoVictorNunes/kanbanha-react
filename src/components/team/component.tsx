@@ -4,7 +4,7 @@ import Select, { MultiValue } from "react-select";
 import * as Tabs from "@radix-ui/react-tabs";
 import Dialog from "../dialog/component";
 import Tasks from "../tasks/component";
-import { useMembers, useProjects, useSocket, useTeams } from "../../hooks";
+import { useMembers, useProjects, useSocket, useTasks, useTeams } from "../../hooks";
 import MemberCard from "../members/member-card/component";
 import styles from './styles.module.css'
 
@@ -19,8 +19,11 @@ const Team: React.FC = () => {
   const [selectedMembers, setSelectedMembers] = useState<SelectValue>([]);
   const nameRef = useRef<HTMLInputElement | null>(null);
   const [isAddMemberDialogOpen, setIsAddMemberDialogOpen] = useState(false);
+  const tasks = useTasks();
   const project = projects.find((p) => p.id === projectId);
   const team = teams.find((t) => t.id === teamId);
+  const tasksOnTheTeam = tasks.filter((t) => t.teamId === teamId)
+  const finishedTasks = tasksOnTheTeam.filter((t) => t.status === 'finished')
 
   const onSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
@@ -68,9 +71,11 @@ const Team: React.FC = () => {
         <div className="grow font-medium flex flex-col">
           <div className="text-lg mb-2">{project?.name} / {team?.name}</div>
           <div className="w-full bg-gray-300 rounded overflow-hidden">
-            <div className="h-[4px] bg-blue-600 w-2/4"></div>
+            <div className="h-[4px] bg-blue-600 w-2/4" style={{
+              width: finishedTasks.length / (tasksOnTheTeam.length || 1) * 100 + '%'
+            }}></div>
           </div>
-          <div className="text-center text-xs text-gray-500">20% complete</div>
+          <div className="text-center text-xs text-gray-500">{(finishedTasks.length / (tasksOnTheTeam.length || 1) * 100).toFixed(0) + '%'} complete</div>
         </div>
         <div className="flex flex-col justify-center">
         <Dialog

@@ -18,15 +18,22 @@ const TasksProvider: React.FC<Props> = (props) => {
     const onCreate = (task: Task) => {
       setTasks([...tasks, task]);
     };
+    const onUpdate = (task: Task) => {
+      const newTasks = tasks.filter((t) => t.id !== task.id);
+      setTasks([...newTasks, task]);
+    };
     socket.on("tasks:create", onCreate);
+    socket.on("tasks:update", onUpdate);
     return () => {
       socket.off("tasks:create", onCreate);
+      socket.on("tasks:update", onUpdate);
     };
   }, [connected, socket, tasks]);
 
   useEffect(() => {
     if (!connected || !socket || isInititalTasksRead.current) return;
     socket.emit("tasks:read", (tasks: Array<Task>) => {
+      console.log(tasks)
       setTasks(tasks);
       isInititalTasksRead.current = true;
     });

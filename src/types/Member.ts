@@ -3,4 +3,5 @@ export type Member = {
   name: string;
   role: string;
   email: string;
+  online: boolean;
 };

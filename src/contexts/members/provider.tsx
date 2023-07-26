@@ -18,15 +18,32 @@ const MembersProvider: React.FC<Props> = (props) => {
     const onCreate = (member: Member) => {
       setMembers([...members, member]);
     };
+    const onDisconnected = (memberId: string) => {
+      const member = members.find((m) => m.id === memberId);
+      if (!member) return;
+      member.online = false;
+      setMembers([...members]);
+    };
+    const onConnected = (memberId: string) => {
+      const member = members.find((m) => m.id === memberId);
+      if (!member) return;
+      member.online = true;
+      setMembers([...members]);
+    };
     socket.on("members:create", onCreate);
+    socket.on("members:member_connected", onConnected);
+    socket.on("members:member_disconnected", onDisconnected);
     return () => {
       socket.off("members:create", onCreate);
+      socket.off("members:member_connected", onConnected);
+      socket.off("members:member_disconnected", onDisconnected);
     };
   }, [connected, socket, members]);
 
   useEffect(() => {
     if (!connected || !socket || isInititalMembersRead.current) return;
     socket.emit("members:read", (members: Array<Member>) => {
+      console.log(members)
       setMembers(members);
       isInititalMembersRead.current = true;
     });

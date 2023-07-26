@@ -8,6 +8,7 @@ import {
   useMembers,
   useProjects,
   useSocket,
+  useTasks,
   useTeams,
 } from "../../hooks";
 import MemberCard from "../members/member-card/component";
@@ -22,12 +23,15 @@ const Project: React.FC = () => {
   const projects = useProjects();
   const teams = useTeams();
   const members = useMembers();
+  const tasks = useTasks();
   const [selectedMembers, setSelectedMembers] = useState<SelectValue>([]);
   const [isNewTeamDialogOpen, setIsNewTeamDialogOpen] = useState(false);
   const nameRef = useRef<HTMLInputElement | null>(null);
 
   const project = projects.find((p) => p.id === projectId);
   const teamsOnTheProject = teams.filter((t) => t.projectId === projectId);
+  const tasksOnTheProject = tasks.filter((t) => teamsOnTheProject.some((team) => team.id === t.teamId))
+  const finishedTasks = tasksOnTheProject.filter((t) => t.status === 'finished')
 
   const onSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
@@ -84,9 +88,11 @@ const Project: React.FC = () => {
         <div className="grow font-medium flex flex-col">
           <div className="text-lg mb-2">{project?.name}</div>
           <div className="w-full">
-            <div className="h-[4px] bg-blue-600 w-2/4 rounded"></div>
+            <div className="h-[4px] bg-blue-600 rounded" style={{
+              width: finishedTasks.length / tasksOnTheProject.length * 100 + '%'
+            }}></div>
           </div>
-          <div className="text-center text-xs text-gray-500">20% complete</div>
+          <div className="text-center text-xs text-gray-500">{(finishedTasks.length / tasksOnTheProject.length * 100).toFixed(0) + '%'} complete</div>
         </div>
         <div className="flex flex-col justify-center">
           <Dialog
