@@ -1,6 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import App from "./App.tsx";
 import AuthProvider from "./contexts/auth/provider.tsx";
 import SocketProvider from "./contexts/socket/provider.tsx";
@@ -27,6 +29,7 @@ const router = createBrowserRouter([
               <MembersProvider>
                 <TasksProvider>
                   <App />
+                  <ToastContainer />
                 </TasksProvider>
               </MembersProvider>
             </TeamsProvider>

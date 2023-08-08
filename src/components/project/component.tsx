@@ -12,7 +12,7 @@ import {
   useTeams,
 } from "../../hooks";
 import MemberCard from "../members/member-card/component";
-import styles from './styles.module.css'
+import styles from "./styles.module.css";
 
 type SelectValue = MultiValue<{ value: string; label: string }>;
 
@@ -26,23 +26,30 @@ const Project: React.FC = () => {
   const tasks = useTasks();
   const [selectedMembers, setSelectedMembers] = useState<SelectValue>([]);
   const [isNewTeamDialogOpen, setIsNewTeamDialogOpen] = useState(false);
+  const [editing, setEditing] = useState(false);
   const nameRef = useRef<HTMLInputElement | null>(null);
 
   const project = projects.find((p) => p.id === projectId);
   const teamsOnTheProject = teams.filter((t) => t.projectId === projectId);
-  const tasksOnTheProject = tasks.filter((t) => teamsOnTheProject.some((team) => team.id === t.teamId))
-  const finishedTasks = tasksOnTheProject.filter((t) => t.status === 'finished')
+  const tasksOnTheProject = tasks.filter((t) =>
+    teamsOnTheProject.some((team) => team.id === t.teamId)
+  );
+  const finishedTasks = tasksOnTheProject.filter(
+    (t) => t.status === "finished"
+  );
 
   const onSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
     if (!nameRef.current || !socket) return;
-    socket.emit("teams:create", {
-      projectId,
-      team: {
+    socket.emit(
+      "teams:create",
+      {
+        projectId,
         name: nameRef.current.value,
+        members: selectedMembers.map((m) => m.value),
       },
-      members: selectedMembers.map((m) => m.value),
-    });
+      (response: any) => console.log(response)
+    );
   };
 
   const renderCreateTeamForm = () => {
@@ -88,11 +95,20 @@ const Project: React.FC = () => {
         <div className="grow font-medium flex flex-col">
           <div className="text-lg mb-2">{project?.name}</div>
           <div className="w-full">
-            <div className="h-[4px] bg-blue-600 rounded" style={{
-              width: finishedTasks.length / tasksOnTheProject.length * 100 + '%'
-            }}></div>
+            <div
+              className="h-[4px] bg-blue-600 rounded"
+              style={{
+                width:
+                  (finishedTasks.length / tasksOnTheProject.length) * 100 + "%",
+              }}
+            ></div>
           </div>
-          <div className="text-center text-xs text-gray-500">{(finishedTasks.length / tasksOnTheProject.length * 100).toFixed(0) + '%'} complete</div>
+          <div className="text-center text-xs text-gray-500">
+            {((finishedTasks.length / tasksOnTheProject.length) * 100).toFixed(
+              0
+            ) + "%"}{" "}
+            complete
+          </div>
         </div>
         <div className="flex flex-col justify-center">
           <Dialog
@@ -125,11 +141,49 @@ const Project: React.FC = () => {
         <Tabs.Content value="tab1" className="py-2 flex flex-col gap-4">
           <div>
             <div className="text-xs text-gray-500 font-bold">Name</div>
-            <div>{project?.name}</div>
+            <div contentEditable={editing} id="projectName">
+              {project?.name}
+            </div>
           </div>
           <div>
             <div className="text-xs text-gray-500 font-bold">Owner</div>
             <MemberCard memberId={project?.ownerId as string} />
+          </div>
+          <div className="flex gap-2">
+            {editing ? (
+              <>
+                <button onClick={() => {
+                  setEditing(false);
+                }} className="border-[1px] border-black rounded py-1 px-4 hover:bg-gray-200">Cancel</button>
+                <button
+                  className="border-[1px] border-red-600 bg-red-600 text-white rounded py-1 px-4 hover:bg-red-700"
+                >Delete</button>
+                <button
+                  onClick={() => {
+                    setEditing(false);
+                    const name =
+                      document.getElementById("projectName")?.innerText;
+                    socket?.emit(
+                      "projects:update",
+                      { id: projectId, name },
+                      (response: any) => console.log(response)
+                    );
+                  }}
+                  className="border-[1px] border-blue-600 bg-blue-600 text-white rounded py-1 px-4 hover:bg-blue-700"
+                >
+                  Save
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => {
+                  setEditing(true);
+                }}
+                className="border-[1px] border-blue-600 bg-blue-600 text-white rounded py-1 px-4 hover:bg-blue-700"
+              >
+                Edit
+              </button>
+            )}
           </div>
         </Tabs.Content>
         <Tabs.Content value="tab2">

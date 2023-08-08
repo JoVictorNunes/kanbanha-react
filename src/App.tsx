@@ -1,9 +1,9 @@
-import { Outlet } from 'react-router-dom'
+import { Outlet } from "react-router-dom";
 import "./App.css";
-import Sidebar from './components/sidebar/component';
-import Topbar from './components/topbar/component';
-import { useSocket } from './hooks';
-import { useEffect } from 'react';
+import Sidebar from "./components/sidebar/component";
+import Topbar from "./components/topbar/component";
+import { useSocket } from "./hooks";
+import { useEffect } from "react";
 
 function App() {
   const { socket } = useSocket();
@@ -11,7 +11,7 @@ function App() {
   useEffect(() => {
     if (!socket) return;
     socket.connect();
-  }, [socket])
+  }, [socket]);
 
   return (
     <div className={`h-full root`}>

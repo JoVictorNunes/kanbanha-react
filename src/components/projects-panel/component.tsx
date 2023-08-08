@@ -1,7 +1,8 @@
-import React, { SyntheticEvent, useRef } from "react";
+import React, { SyntheticEvent, useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
 import * as Dialog from "@radix-ui/react-dialog";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { toast } from "react-toastify";
 import { useAuth, useProjects, useSocket } from "../../hooks";
 
 const Projects: React.FC = () => {
@@ -11,11 +12,17 @@ const Projects: React.FC = () => {
   const nameRef = useRef<HTMLInputElement>(null);
   const projectsIOwn = projects.filter((p) => p.ownerId === currentMember?.id);
   const projectsIAmIn = projects.filter((p) => p.ownerId !== currentMember?.id);
+  const [isAddingProject, setIsAddingProject] = useState(false);
 
   const onSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
     if (!socket || !nameRef.current) return;
-    socket.emit("projects:create", { name: nameRef.current.value });
+    setIsAddingProject(false)
+    socket.emit("projects:create", { name: nameRef.current.value }, (response: { code: number }) => {
+      if (response.code === 201) {
+        toast.success("Project created!")
+      }
+    });
   };
 
   const renderNewProjectForm = () => (
@@ -28,8 +35,8 @@ const Projects: React.FC = () => {
           className="outline-none border-[1px] border-gray-300 rounded-lg p-2"
           ref={nameRef}
           required
-          max={20}
-          min={3}
+          maxLength={12}
+          minLength={3}
         />
       </div>
       <button
@@ -129,9 +136,9 @@ const Projects: React.FC = () => {
         </div>
       </div>
       <div>
-        <Dialog.Root>
+        <Dialog.Root open={isAddingProject} onOpenChange={(open) => setIsAddingProject(open)}>
           <Dialog.Trigger asChild>
-            <button className="flex border-2 border-dashed border-indigo-500 text-indigo-500 px-6 py-3 rounded-lg w-full justify-center hover:bg-indigo-50">
+            <button onClick={() => setIsAddingProject(true)} className="flex border-2 border-dashed border-indigo-500 text-indigo-500 px-6 py-3 rounded-lg w-full justify-center hover:bg-indigo-50">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"

@@ -24,11 +24,17 @@ const ProjectsProvider: React.FC<Props> = (props) => {
       );
       setProjects(projectsFiltered);
     };
+    const onUpdate = (project: Project) => {
+      const filteredProjects = projects.filter((p) => p.id !== project.id);
+      setProjects([...filteredProjects, project]);
+    };
     socket.on("projects:create", onCreate);
     socket.on("projects:delete", onDelete);
+    socket.on("projects:update", onUpdate);
     return () => {
       socket.off("projects:create", onCreate);
       socket.off("projects:delete", onDelete);
+      socket.off("projects:update", onUpdate);
     };
   }, [connected, socket, projects]);
 

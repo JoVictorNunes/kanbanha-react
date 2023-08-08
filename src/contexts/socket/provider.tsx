@@ -26,7 +26,6 @@ const SocketProvider: React.FC<Props> = (props) => {
       setSocket(socket);
     }
   }, [authenticated, token, socket]);
-  console.log(connected)
 
   return (
     <SocketContext.Provider
