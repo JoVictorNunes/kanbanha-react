@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Socket, io } from "socket.io-client";
-import SocketContext from "./context";
 import { useAuth } from "../../hooks";
+import SocketContext, {
+  type ClientToServerEvents,
+  type ServerToClientsEvents,
+} from "./context";
 
 interface Props {
   children: React.ReactNode;
@@ -15,12 +18,15 @@ const SocketProvider: React.FC<Props> = (props) => {
 
   useEffect(() => {
     if (authenticated && !socket) {
-      const socket = io("http://localhost:3000", {
-        auth: {
-          token: token,
-        },
-        autoConnect: false,
-      });
+      const socket: Socket<ServerToClientsEvents, ClientToServerEvents> = io(
+        "http://localhost:3000",
+        {
+          auth: {
+            token: token,
+          },
+          autoConnect: false,
+        }
+      );
       socket.on("connect", () => setConnected(true));
       socket.on("disconnect", () => setConnected(false));
       setSocket(socket);

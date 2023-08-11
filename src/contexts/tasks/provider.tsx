@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import TaskContext from "./context";
 import { useSocket } from "../../hooks";
-import { Task } from "../../types";
+import type { Task } from "@/contexts/socket/context";
 
 interface Props {
   children: React.ReactNode;
@@ -19,21 +19,25 @@ const TasksProvider: React.FC<Props> = (props) => {
       setTasks([...tasks, task]);
     };
     const onUpdate = (task: Task) => {
-      const newTasks = tasks.filter((t) => t.id !== task.id);
-      setTasks([...newTasks, task]);
+      const filteredTasks = tasks.filter((t) => t.id !== task.id);
+      setTasks([...filteredTasks, task]);
     };
+    const onDelete = (taskId: string) => {
+      setTasks(tasks.filter((t) => t.id !== taskId))
+    }
     socket.on("tasks:create", onCreate);
     socket.on("tasks:update", onUpdate);
+    socket.on("tasks:delete", onDelete);
     return () => {
       socket.off("tasks:create", onCreate);
-      socket.on("tasks:update", onUpdate);
+      socket.off("tasks:update", onUpdate);
+      socket.off("tasks:delete", onDelete);
     };
   }, [connected, socket, tasks]);
 
   useEffect(() => {
     if (!connected || !socket || isInititalTasksRead.current) return;
     socket.emit("tasks:read", (tasks: Array<Task>) => {
-      console.log(tasks)
       setTasks(tasks);
       isInititalTasksRead.current = true;
     });

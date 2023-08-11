@@ -10,12 +10,15 @@ import ProjectsProvider from "./contexts/projects/provider.tsx";
 import TeamsProvider from "./contexts/teams/provider.tsx";
 import MembersProvider from "./contexts/members/provider.tsx";
 import TasksProvider from "./contexts/tasks/provider.tsx";
-import Login from "./components/login/component.tsx";
+import LayoutProvider from "./contexts/layout/provider.tsx";
+import SignIn from "./components/signin/component.tsx";
 import Home from "./components/home/component.tsx";
 import authLoader from "./contexts/auth/loader.ts";
 import Project from "./components/project/component.tsx";
 import Team from "./components/team/component.tsx";
 import "./index.css";
+import Account from "./components/account/component.tsx";
+import SignUp from "./components/signup/component.tsx";
 
 const router = createBrowserRouter([
   {
@@ -28,7 +31,9 @@ const router = createBrowserRouter([
             <TeamsProvider>
               <MembersProvider>
                 <TasksProvider>
-                  <App />
+                  <LayoutProvider>
+                    <App />
+                  </LayoutProvider>
                   <ToastContainer />
                 </TasksProvider>
               </MembersProvider>
@@ -50,11 +55,19 @@ const router = createBrowserRouter([
         path: "projects/:projectId/teams/:teamId",
         element: <Team />,
       },
+      {
+        path: "account",
+        element: <Account />,
+      },
     ],
   },
   {
-    path: "login",
-    element: <Login />,
+    path: "signin",
+    element: <SignIn />,
+  },
+  {
+    path: "signup",
+    element: <SignUp />,
   },
 ]);
 

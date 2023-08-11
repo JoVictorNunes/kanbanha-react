@@ -4,9 +4,15 @@ import Select, { MultiValue } from "react-select";
 import * as Tabs from "@radix-ui/react-tabs";
 import Dialog from "../dialog/component";
 import Tasks from "../tasks/component";
-import { useMembers, useProjects, useSocket, useTasks, useTeams } from "../../hooks";
-import MemberCard from "../members/member-card/component";
-import styles from './styles.module.css'
+import {
+  useLayout,
+  useMembers,
+  useProjects,
+  useSocket,
+  useTasks,
+  useTeams,
+} from "../../hooks";
+import MemberCard from "../members/card/component";
 
 type SelectValue = MultiValue<{ value: string; label: string }>;
 
@@ -20,21 +26,26 @@ const Team: React.FC = () => {
   const nameRef = useRef<HTMLInputElement | null>(null);
   const [isAddMemberDialogOpen, setIsAddMemberDialogOpen] = useState(false);
   const tasks = useTasks();
+  const { state } = useLayout();
   const project = projects.find((p) => p.id === projectId);
   const team = teams.find((t) => t.id === teamId);
-  const tasksOnTheTeam = tasks.filter((t) => t.teamId === teamId)
-  const finishedTasks = tasksOnTheTeam.filter((t) => t.status === 'finished')
+  const tasksOnTheTeam = tasks.filter((t) => t.teamId === teamId);
+  const finishedTasks = tasksOnTheTeam.filter((t) => t.status === "finished");
+
+  if (!project || !team || !teamId || !projectId) return;
 
   const onSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
     if (!nameRef.current || !socket) return;
-    socket.emit("teams:create", {
-      projectId,
-      team: {
+    socket.emit(
+      "teams:create",
+      {
+        projectId,
         name: nameRef.current.value,
+        members: selectedMembers.map((m) => m.value),
       },
-      members: selectedMembers.map((m) => m.value),
-    });
+      (res) => console.log(res)
+    );
   };
 
   const renderAddMembersForm = () => {
@@ -66,19 +77,40 @@ const Team: React.FC = () => {
   };
 
   return (
-    <div className={`w-full flex flex-col p-6 ${styles.root}`}>
-      <div className="flex pb-6 gap-4">
+    <div
+      className={`flex flex-col absolute overflow-hidden`}
+      style={{
+        width: state.main.width,
+        height: state.main.height,
+        left: state.main.left,
+        top: state.main.top,
+      }}
+    >
+      <div className="flex pb-6 gap-4 h-20">
         <div className="grow font-medium flex flex-col">
-          <div className="text-lg mb-2">{project?.name} / {team?.name}</div>
-          <div className="w-full bg-gray-300 rounded overflow-hidden">
-            <div className="h-[4px] bg-blue-600 w-2/4" style={{
-              width: finishedTasks.length / (tasksOnTheTeam.length || 1) * 100 + '%'
-            }}></div>
+          <div className="text-lg mb-2">
+            {project?.name} / {team?.name}
           </div>
-          <div className="text-center text-xs text-gray-500">{(finishedTasks.length / (tasksOnTheTeam.length || 1) * 100).toFixed(0) + '%'} complete</div>
+          <div className="w-full bg-gray-300 rounded overflow-hidden">
+            <div
+              className="h-[4px] bg-blue-600 w-2/4"
+              style={{
+                width:
+                  (finishedTasks.length / (tasksOnTheTeam.length || 1)) * 100 +
+                  "%",
+              }}
+            ></div>
+          </div>
+          <div className="text-center text-xs text-gray-500">
+            {(
+              (finishedTasks.length / (tasksOnTheTeam.length || 1)) *
+              100
+            ).toFixed(0) + "%"}{" "}
+            complete
+          </div>
         </div>
         <div className="flex flex-col justify-center">
-        <Dialog
+          <Dialog
             open={isAddMemberDialogOpen}
             onOpenChange={setIsAddMemberDialogOpen}
             title="Add New Member"
@@ -90,8 +122,12 @@ const Team: React.FC = () => {
           </Dialog>
         </div>
       </div>
-      <Tabs.Root defaultValue="tab1" className="grow flex flex-col">
-        <Tabs.List>
+      <Tabs.Root
+        defaultValue="tab1"
+        className="flex flex-col overflow-hidden"
+        style={{ height: state.main.height - 80 }}
+      >
+        <Tabs.List style={{ height: 0.1 * (state.main.height - 80) }}>
           <Tabs.Trigger
             value="tab1"
             className="p-3 border-b-2 border-b-transparent data-[state=active]:border-b-blue-700"
@@ -116,14 +152,18 @@ const Team: React.FC = () => {
           <div className="flex flex-col gap-4 p-4">
             {team?.members.map((m) => {
               const member = members.find((n) => n.id === m);
-              return (
-                <MemberCard memberId={member?.id as string} />
-              );
+              return <MemberCard memberId={member?.id as string} />;
             })}
           </div>
         </Tabs.Content>
-        <Tabs.Content value="tab3" className="grow">
-          <Tasks teamId={teamId as string} />
+        <Tabs.Content
+          value="tab3"
+          style={{ height: 0.9 * (state.main.height - 80) }}
+        >
+          <Tasks
+            teamId={teamId as string}
+            availableHeight={0.9 * (state.main.height - 80)}
+          />
         </Tabs.Content>
       </Tabs.Root>
     </div>

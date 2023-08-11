@@ -19,8 +19,12 @@ const MemberCard: React.FC<Props> = (props) => {
       <div>
         <div>{member.name}</div>
         <div className="text-sm text-gray-600">{member.role}</div>
-        <div className={`relative text-xs text-gray-600 pl-2 before:w-1 before:h-1 before:content-[''] before:absolute before:rounded-full ${member.online ? 'before:bg-green-500' : 'before:bg-red-500'} before:left-0 before:top-1/2 before:translate-y-[-2px]`}>
-          {member.online ? 'Online' : 'Offline'}
+        <div
+          className={`relative text-xs text-gray-600 pl-2 before:w-1 before:h-1 before:content-[''] before:absolute before:rounded-full ${
+            member.online ? "before:bg-green-500" : "before:bg-red-500"
+          } before:left-0 before:top-1/2 before:translate-y-[-2px]`}
+        >
+          {member.online ? "Online" : "Offline"}
         </div>
       </div>
     </div>

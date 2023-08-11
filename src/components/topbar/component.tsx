@@ -1,16 +1,19 @@
 import React from "react";
-import styles from "./styles.module.css";
-import { useAuth } from "../../hooks";
+import { useAuth, useLayout } from "../../hooks";
 import Dropdown from "../dropdown/component";
+import { useNavigate } from "react-router-dom";
 
 const Topbar: React.FC = () => {
   const { currentMember } = useAuth();
+  const navigate = useNavigate();
+  const { state } = useLayout();
 
   const options = [
     {
       label: "My account",
       onSelect: (e: Event) => {
         console.log("My account selected");
+        navigate("/account");
       },
     },
     {
@@ -23,7 +26,13 @@ const Topbar: React.FC = () => {
 
   return (
     <div
-      className={`h-16 px-6 pt-6 flex items-center gap-3 text-sm text-gray-500 justify-end ${styles.container}`}
+      className={`h-16 px-6 pt-6 flex items-center gap-3 text-sm text-gray-500 justify-end absolute`}
+      style={{
+        height: state.topbar.height,
+        width: state.topbar.width,
+        left: state.topbar.left,
+        top: state.topbar.top,
+      }}
     >
       <button>
         <svg

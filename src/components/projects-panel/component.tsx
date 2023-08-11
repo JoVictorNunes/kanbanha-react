@@ -1,28 +1,28 @@
 import React, { SyntheticEvent, useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
 import * as Dialog from "@radix-ui/react-dialog";
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { toast } from "react-toastify";
-import { useAuth, useProjects, useSocket } from "../../hooks";
+import { useProjects, useSocket } from "../../hooks";
 
 const Projects: React.FC = () => {
   const projects = useProjects();
   const { socket } = useSocket();
-  const { currentMember } = useAuth();
   const nameRef = useRef<HTMLInputElement>(null);
-  const projectsIOwn = projects.filter((p) => p.ownerId === currentMember?.id);
-  const projectsIAmIn = projects.filter((p) => p.ownerId !== currentMember?.id);
   const [isAddingProject, setIsAddingProject] = useState(false);
 
   const onSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
     if (!socket || !nameRef.current) return;
-    setIsAddingProject(false)
-    socket.emit("projects:create", { name: nameRef.current.value }, (response: { code: number }) => {
-      if (response.code === 201) {
-        toast.success("Project created!")
+    setIsAddingProject(false);
+    socket.emit(
+      "projects:create",
+      { name: nameRef.current.value },
+      (response: { code: number }) => {
+        if (response.code === 201) {
+          toast.success("Project created!");
+        }
       }
-    });
+    );
   };
 
   const renderNewProjectForm = () => (
@@ -50,13 +50,13 @@ const Projects: React.FC = () => {
 
   return (
     <div
-      className={`flex flex-col gap-6 p-5 border-r-2 border-r-gray-100 w-80`}
+      className={`flex flex-col gap-6 p-5 border-r-2 border-r-gray-100 w-full h-full`}
     >
       <div className={`grow flex flex-col gap-8`}>
         <div>
-          <h2 className={`text-xl pb-2`}>Your projects</h2>
+          <h2 className={`text-xl pb-2`}>Projects</h2>
           <div className={`flex flex-col gap-2`}>
-            {projectsIOwn.map((p) => {
+            {projects.map((p) => {
               return (
                 <div className="flex gap-2">
                   <NavLink
@@ -76,69 +76,22 @@ const Projects: React.FC = () => {
                       {p.name}
                     </span>
                   </NavLink>
-                  <DropdownMenu.Root>
-                    <DropdownMenu.Trigger asChild>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                        }}
-                        className="outline-none border-none bg-transparent p-2 rounded-full hover:bg-gray-200 h-fit focus:shadow-[0px_0px_0px_2px] focus:shadow-blue-600"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth={1.5}
-                          stroke="currentColor"
-                          className="w-6 h-6"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z"
-                          />
-                        </svg>
-                      </button>
-                    </DropdownMenu.Trigger>
-
-                    <DropdownMenu.Portal>
-                      <DropdownMenu.Content className="bg-white min-w-[220px] shadow shadow-gray-400 rounded overflow-hidden">
-                        <DropdownMenu.Item className="outline-none p-2 data-[highlighted]:bg-blue-600 data-[highlighted]:text-white">
-                          Edit
-                        </DropdownMenu.Item>
-                        {/* <DropdownMenu.Separator className="h-[1px] bg-gray-300 m-2" /> */}
-                        <DropdownMenu.Group>
-                          <DropdownMenu.Item className="outline-none p-2 text-red-600 data-[highlighted]:bg-red-100">
-                            Delete
-                          </DropdownMenu.Item>
-                        </DropdownMenu.Group>
-
-                        <DropdownMenu.Arrow className="fill-gray-900" />
-                      </DropdownMenu.Content>
-                    </DropdownMenu.Portal>
-                  </DropdownMenu.Root>
                 </div>
-              );
-            })}
-          </div>
-        </div>
-        <div>
-          <h2 className={`text-xl`}>Projects you participate</h2>
-          <div className={`flex flex-col`}>
-            {projectsIAmIn.map((p) => {
-              return (
-                <NavLink to={`projects/${p.id}`} key={p.id}>
-                  {p.name}
-                </NavLink>
               );
             })}
           </div>
         </div>
       </div>
       <div>
-        <Dialog.Root open={isAddingProject} onOpenChange={(open) => setIsAddingProject(open)}>
+        <Dialog.Root
+          open={isAddingProject}
+          onOpenChange={(open) => setIsAddingProject(open)}
+        >
           <Dialog.Trigger asChild>
-            <button onClick={() => setIsAddingProject(true)} className="flex border-2 border-dashed border-indigo-500 text-indigo-500 px-6 py-3 rounded-lg w-full justify-center hover:bg-indigo-50">
+            <button
+              onClick={() => setIsAddingProject(true)}
+              className="flex border-2 border-dashed border-indigo-500 text-indigo-500 px-6 py-3 rounded-lg w-full justify-center hover:bg-indigo-50"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -153,7 +106,7 @@ const Projects: React.FC = () => {
                   d="M12 6v12m6-6H6"
                 />
               </svg>
-              <span>Create New Project</span>
+              <span>New Project</span>
             </button>
           </Dialog.Trigger>
           <Dialog.Portal>

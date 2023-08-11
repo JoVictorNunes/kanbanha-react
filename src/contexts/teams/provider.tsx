@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import TeamsContext from "./context";
 import { useSocket } from "../../hooks";
-import { Team } from "@/types";
+import type { Team } from "@/contexts/socket/context";
 
 interface Props {
   children: React.ReactNode;
@@ -18,9 +18,20 @@ const TeamsProvider: React.FC<Props> = (props) => {
     const onCreate = (team: Team) => {
       setTeams([...teams, team]);
     };
+    const onUpdate = (team: Team) => {
+      const filteredTeams = teams.filter((t) => t.id !== team.id);
+      setTeams([...filteredTeams, team]);
+    };
+    const onDelete = (teamId: string) => {
+      setTeams(teams.filter((t) => t.id !== teamId));
+    };
     socket.on("teams:create", onCreate);
+    socket.on("teams:update", onUpdate);
+    socket.on("teams:delete", onDelete);
     return () => {
       socket.off("teams:create", onCreate);
+      socket.off("teams:update", onUpdate);
+      socket.off("teams:delete", onDelete);
     };
   }, [connected, socket, teams]);
 

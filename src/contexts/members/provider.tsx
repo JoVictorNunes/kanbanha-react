@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import MemberContext from "./context";
 import { useSocket } from "../../hooks";
-import { Member } from "../../types";
+import type { Member } from "@/contexts/socket/context";
 
 interface Props {
   children: React.ReactNode;
@@ -18,6 +18,13 @@ const MembersProvider: React.FC<Props> = (props) => {
     const onCreate = (member: Member) => {
       setMembers([...members, member]);
     };
+    const onUpdate = (member: Member) => {
+      const membersFiltered = members.filter((m) => m.id !== member.id);
+      setMembers([...membersFiltered, member]);
+    };
+    const onDelete = (memberId: string) => {
+      setMembers(members.filter((m) => m.id !== memberId));
+    };
     const onDisconnected = (memberId: string) => {
       const member = members.find((m) => m.id === memberId);
       if (!member) return;
@@ -31,10 +38,14 @@ const MembersProvider: React.FC<Props> = (props) => {
       setMembers([...members]);
     };
     socket.on("members:create", onCreate);
+    socket.on("members:update", onUpdate);
+    socket.on("members:delete", onDelete);
     socket.on("members:member_connected", onConnected);
     socket.on("members:member_disconnected", onDisconnected);
     return () => {
       socket.off("members:create", onCreate);
+      socket.off("members:update", onUpdate);
+      socket.off("members:delete", onDelete);
       socket.off("members:member_connected", onConnected);
       socket.off("members:member_disconnected", onDisconnected);
     };
@@ -43,7 +54,6 @@ const MembersProvider: React.FC<Props> = (props) => {
   useEffect(() => {
     if (!connected || !socket || isInititalMembersRead.current) return;
     socket.emit("members:read", (members: Array<Member>) => {
-      console.log(members)
       setMembers(members);
       isInititalMembersRead.current = true;
     });

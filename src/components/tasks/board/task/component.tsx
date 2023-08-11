@@ -1,6 +1,6 @@
-import { useMembers } from "../../../../hooks";
+import { useMembers, useSocket } from "../../../../hooks";
 import Dropdown from "../../../dropdown/component";
-import type { Task } from "@/types";
+import type { Task } from "@/contexts/socket/context";
 import React, { useState } from "react";
 
 interface Props {
@@ -10,6 +10,7 @@ interface Props {
 const Task: React.FC<Props> = (props) => {
   const { task } = props;
   const members = useMembers();
+  const { socket } = useSocket();
   const [isDragging, setIsDragging] = useState(false);
   const assignees = task.assignees
     .map((assigneeId) => members.find((member) => member.id === assigneeId))
@@ -20,6 +21,8 @@ const Task: React.FC<Props> = (props) => {
       label: "Delete",
       onSelect: (e: Event) => {
         console.log(e);
+        if (!socket) return;
+        socket.emit("tasks:delete", task.id, (res) => console.log(res));
       },
     },
     {

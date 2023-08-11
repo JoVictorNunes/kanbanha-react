@@ -1,5 +1,5 @@
 import React from "react";
-import { Project } from "@/types";
+import type { Project } from "@/contexts/socket/context";
 
 const ProjectsContext = React.createContext<Array<Project>>([]);
 

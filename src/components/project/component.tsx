@@ -5,14 +5,14 @@ import * as Tabs from "@radix-ui/react-tabs";
 import Dialog from "../dialog/component";
 import {
   useAuth,
+  useLayout,
   useMembers,
   useProjects,
   useSocket,
   useTasks,
   useTeams,
 } from "../../hooks";
-import MemberCard from "../members/member-card/component";
-import styles from "./styles.module.css";
+import MemberCard from "../members/card/component";
 
 type SelectValue = MultiValue<{ value: string; label: string }>;
 
@@ -28,6 +28,7 @@ const Project: React.FC = () => {
   const [isNewTeamDialogOpen, setIsNewTeamDialogOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const nameRef = useRef<HTMLInputElement | null>(null);
+  const { state } = useLayout();
 
   const project = projects.find((p) => p.id === projectId);
   const teamsOnTheProject = teams.filter((t) => t.projectId === projectId);
@@ -37,6 +38,14 @@ const Project: React.FC = () => {
   const finishedTasks = tasksOnTheProject.filter(
     (t) => t.status === "finished"
   );
+
+  if (!project || !projectId) {
+    return (
+      <div className="font-light">
+        This project does not exist or was deleted.
+      </div>
+    );
+  }
 
   const onSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
@@ -48,7 +57,7 @@ const Project: React.FC = () => {
         name: nameRef.current.value,
         members: selectedMembers.map((m) => m.value),
       },
-      (response: any) => console.log(response)
+      (response) => console.log(response)
     );
   };
 
@@ -90,7 +99,15 @@ const Project: React.FC = () => {
   };
 
   return (
-    <div className={`w-full p-6 ${styles.root}`}>
+    <div
+      className={`p-6 absolute`}
+      style={{
+        width: state.main.width,
+        height: state.main.height,
+        left: state.main.left,
+        top: state.main.top,
+      }}
+    >
       <div className="flex pb-6 gap-4">
         <div className="grow font-medium flex flex-col">
           <div className="text-lg mb-2">{project?.name}</div>
@@ -152,21 +169,34 @@ const Project: React.FC = () => {
           <div className="flex gap-2">
             {editing ? (
               <>
-                <button onClick={() => {
-                  setEditing(false);
-                }} className="border-[1px] border-black rounded py-1 px-4 hover:bg-gray-200">Cancel</button>
                 <button
+                  onClick={() => {
+                    setEditing(false);
+                  }}
+                  className="border-[1px] border-black rounded py-1 px-4 hover:bg-gray-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    socket?.emit("projects:delete", projectId, (response) =>
+                      console.log(response)
+                    );
+                  }}
                   className="border-[1px] border-red-600 bg-red-600 text-white rounded py-1 px-4 hover:bg-red-700"
-                >Delete</button>
+                >
+                  Delete
+                </button>
                 <button
                   onClick={() => {
                     setEditing(false);
                     const name =
                       document.getElementById("projectName")?.innerText;
+                    if (!name || name === "") return;
                     socket?.emit(
                       "projects:update",
                       { id: projectId, name },
-                      (response: any) => console.log(response)
+                      (response) => console.log(response)
                     );
                   }}
                   className="border-[1px] border-blue-600 bg-blue-600 text-white rounded py-1 px-4 hover:bg-blue-700"

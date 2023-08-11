@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import ProjectsContext from "./context";
 import { useSocket } from "../../hooks";
-import { Project } from "@/types";
+import type { Project } from "@/contexts/socket/context";
 
 interface Props {
   children: React.ReactNode;

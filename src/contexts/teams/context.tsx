@@ -1,5 +1,5 @@
 import React from "react";
-import { Team } from "@/types";
+import type { Team } from "@/contexts/socket/context";
 
 const TeamsContext = React.createContext<Array<Team>>([]);
 

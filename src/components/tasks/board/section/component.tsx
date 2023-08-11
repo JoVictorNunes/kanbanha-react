@@ -1,5 +1,6 @@
 import React, { SyntheticEvent, useEffect, useState } from "react";
 import Select, { MultiValue } from "react-select";
+import * as ScrollArea from "@radix-ui/react-scroll-area";
 import Dialog from "../../../dialog/component";
 import { useMembers, useSocket, useTasks, useTeams } from "../../../../hooks";
 import Task from "../task/component";
@@ -7,6 +8,7 @@ import Task from "../task/component";
 interface Props {
   teamId: string;
   status: "active" | "ongoing" | "review" | "finished";
+  availableHeight: number;
 }
 
 const TITLES = {
@@ -26,7 +28,7 @@ const COLORS = {
 type SelectValue = MultiValue<{ value: string; label: string }> | null;
 
 const Section: React.FC<Props> = (props) => {
-  const { teamId, status } = props;
+  const { teamId, status, availableHeight } = props;
   const { socket, connected } = useSocket();
   const teams = useTeams();
   const tasks = useTasks();
@@ -61,24 +63,23 @@ const Section: React.FC<Props> = (props) => {
       e.preventDefault();
       const formData = new FormData(e.target as HTMLFormElement);
       const date = new Date(formData.get("date") as string).getTime();
-      const description = formData.get("description");
+      const description = (formData.get("description") || "") as string;
       const dueDate = new Date(formData.get("dueDate") as string).getTime();
       if (!socket || !connected) return;
-      socket.emit("tasks:create", {
-        teamId,
-        date,
-        description,
-        dueDate,
-        status,
-        assignees: selectedMembers?.map((m) => m.value),
-        inDevelopmentAt: ["ongoing", "review", "finished"].includes(status)
-          ? new Date().getTime()
-          : null,
-        inReviewAt: ["review", "finished"].includes(status)
-          ? new Date().getTime()
-          : null,
-        finishedAt: status === "finished" ? new Date().getTime() : null,
-      });
+      socket.emit(
+        "tasks:create",
+        {
+          teamId,
+          date,
+          description,
+          dueDate,
+          status,
+          assignees: selectedMembers?.map((m) => m.value) || [],
+        },
+        (res) => {
+          console.log(res);
+        }
+      );
     };
     const options = teamMembers.map((m) => ({
       value: m.id,
@@ -134,7 +135,9 @@ const Section: React.FC<Props> = (props) => {
     setIsDraggingOver(false);
     const taskId = e.dataTransfer.getData("text/plain");
 
-    socket?.emit("tasks:move", { status, taskId });
+    socket?.emit("tasks:move", { status, taskId }, (res) => {
+      console.log(res);
+    });
   };
 
   const onDragOver = (e: React.DragEvent) => {
@@ -142,6 +145,7 @@ const Section: React.FC<Props> = (props) => {
   };
 
   const onDragEnter = () => {
+    console.log("hm");
     setIsDraggingOver(true);
   };
 
@@ -151,11 +155,8 @@ const Section: React.FC<Props> = (props) => {
 
   return (
     <div
-      onDrop={onDrop}
-      onDragOver={onDragOver}
-      onDragLeave={onDragLeave}
-      onDragEnter={onDragEnter}
       className={`rounded flex flex-col gap-2`}
+      style={{ height: availableHeight }}
     >
       <div className="flex gap-4 items-center">
         <div
@@ -194,15 +195,46 @@ const Section: React.FC<Props> = (props) => {
         {renderAddTaskForm()}
       </Dialog>
 
-      <div
-        className={`flex flex-col gap-2 h-[500px] overflow-auto border-2 border-dashed border-transparent ${
+      <ScrollArea.Root
+        className={`h-full rounded overflow-hidden border-2 border-dashed border-transparent ${
+          isDragging ? "!border-indigo-500" : ""
+        } ${isDraggingOver ? "bg-gray-300" : ""}`}
+        onDrop={onDrop}
+        onDragOver={onDragOver}
+        onDragLeave={onDragLeave}
+        onDragEnter={onDragEnter}
+      >
+        <ScrollArea.Viewport className={`w-full h-full rounded`}>
+          <div>
+            {tasksFiltered.map((t) => (
+              <Task task={t} />
+            ))}
+          </div>
+        </ScrollArea.Viewport>
+        <ScrollArea.Scrollbar
+          className="flex select-none touch-none p-0.5 bg-gray-200 transition-colors duration-[160ms] ease-out hover:bg-gray-300 data-[orientation=vertical]:w-2.5 data-[orientation=horizontal]:flex-col data-[orientation=horizontal]:h-2.5"
+          orientation="vertical"
+        >
+          <ScrollArea.Thumb className="flex-1 bg-gray-400 rounded-[10px] relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-[44px] before:min-h-[44px]" />
+        </ScrollArea.Scrollbar>
+        <ScrollArea.Scrollbar
+          className="flex select-none touch-none p-0.5 bg-blackA6 transition-colors duration-[160ms] ease-out hover:bg-blackA8 data-[orientation=vertical]:w-2.5 data-[orientation=horizontal]:flex-col data-[orientation=horizontal]:h-2.5"
+          orientation="horizontal"
+        >
+          <ScrollArea.Thumb className="flex-1 bg-mauve10 rounded-[10px] relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-[44px] before:min-h-[44px]" />
+        </ScrollArea.Scrollbar>
+        <ScrollArea.Corner className="bg-blackA8" />
+      </ScrollArea.Root>
+
+      {/* <div
+        className={`h-full flex flex-col gap-2 overflow-auto border-2 border-dashed border-transparent ${
           isDragging ? "!border-indigo-500" : ""
         } ${isDraggingOver ? "bg-gray-300" : ""}`}
       >
         {tasksFiltered.map((t) => (
           <Task task={t} />
         ))}
-      </div>
+      </div> */}
     </div>
   );
 };

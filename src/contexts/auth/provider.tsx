@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLoaderData } from "react-router-dom";
 import { decodeJwt } from "jose";
-import type { AuthLoader, Member } from "@/types";
 import AuthContext from "./context";
+import type { Member } from "@/contexts/socket/context";
+import type { AuthLoader } from "./loader";
 
 interface Props {
   children: React.ReactNode;
@@ -33,7 +34,7 @@ const AuthProvider: React.FC<Props> = (props) => {
       setAuthenticated(false);
       setCurrentMember(null);
       setToken(null);
-      navigate("/login");
+      navigate("/signin");
       return;
     }
   }, [code, navigate]);
