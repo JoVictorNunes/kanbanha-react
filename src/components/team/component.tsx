@@ -78,7 +78,7 @@ const Team: React.FC = () => {
 
   return (
     <div
-      className={`flex flex-col absolute overflow-hidden`}
+      className={`p-5 flex flex-col absolute overflow-hidden`}
       style={{
         width: state.main.width,
         height: state.main.height,
@@ -125,9 +125,9 @@ const Team: React.FC = () => {
       <Tabs.Root
         defaultValue="tab1"
         className="flex flex-col overflow-hidden"
-        style={{ height: state.main.height - 80 }}
+        style={{ height: state.main.height - 120 }}
       >
-        <Tabs.List style={{ height: 0.1 * (state.main.height - 80) }}>
+        <Tabs.List style={{ height: 0.1 * (state.main.height - 120) }}>
           <Tabs.Trigger
             value="tab1"
             className="p-3 border-b-2 border-b-transparent data-[state=active]:border-b-blue-700"
@@ -158,11 +158,11 @@ const Team: React.FC = () => {
         </Tabs.Content>
         <Tabs.Content
           value="tab3"
-          style={{ height: 0.9 * (state.main.height - 80) }}
+          style={{ height: 0.9 * (state.main.height - 120) }}
         >
           <Tasks
             teamId={teamId as string}
-            availableHeight={0.9 * (state.main.height - 80)}
+            availableHeight={0.9 * (state.main.height - 120)}
           />
         </Tabs.Content>
       </Tabs.Root>

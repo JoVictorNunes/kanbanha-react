@@ -1,4 +1,5 @@
-import React, { SyntheticEvent, useEffect, useState } from "react";
+import React, { SyntheticEvent, useState } from "react";
+import { Droppable } from "react-beautiful-dnd";
 import Select, { MultiValue } from "react-select";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import Dialog from "../../../dialog/component";
@@ -38,19 +39,6 @@ const Section: React.FC<Props> = (props) => {
   const [date, setDate] = useState<string>(
     new Date().toISOString().split("T")[0]
   );
-  const [isDragging, setIsDragging] = useState(false);
-  const [isDraggingOver, setIsDraggingOver] = useState(false);
-
-  useEffect(() => {
-    const onDragStart = () => setIsDragging(true);
-    const onDragEnd = () => setIsDragging(false);
-    window.addEventListener("dragstart", onDragStart);
-    window.addEventListener("dragend", onDragEnd);
-    return () => {
-      window.removeEventListener("dragstart", onDragStart);
-      window.removeEventListener("dragend", onDragEnd);
-    };
-  }, []);
 
   const team = teams.find((t) => t.id === teamId);
   if (!team) return null;
@@ -130,29 +118,6 @@ const Section: React.FC<Props> = (props) => {
     );
   }
 
-  const onDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDraggingOver(false);
-    const taskId = e.dataTransfer.getData("text/plain");
-
-    socket?.emit("tasks:move", { status, taskId }, (res) => {
-      console.log(res);
-    });
-  };
-
-  const onDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-  };
-
-  const onDragEnter = () => {
-    console.log("hm");
-    setIsDraggingOver(true);
-  };
-
-  const onDragLeave = () => {
-    setIsDraggingOver(false);
-  };
-
   return (
     <div
       className={`rounded flex flex-col gap-2`}
@@ -195,46 +160,39 @@ const Section: React.FC<Props> = (props) => {
         {renderAddTaskForm()}
       </Dialog>
 
-      <ScrollArea.Root
-        className={`h-full rounded overflow-hidden border-2 border-dashed border-transparent ${
-          isDragging ? "!border-indigo-500" : ""
-        } ${isDraggingOver ? "bg-gray-300" : ""}`}
-        onDrop={onDrop}
-        onDragOver={onDragOver}
-        onDragLeave={onDragLeave}
-        onDragEnter={onDragEnter}
-      >
-        <ScrollArea.Viewport className={`w-full h-full rounded`}>
-          <div>
-            {tasksFiltered.map((t) => (
-              <Task task={t} />
-            ))}
-          </div>
-        </ScrollArea.Viewport>
-        <ScrollArea.Scrollbar
-          className="flex select-none touch-none p-0.5 bg-gray-200 transition-colors duration-[160ms] ease-out hover:bg-gray-300 data-[orientation=vertical]:w-2.5 data-[orientation=horizontal]:flex-col data-[orientation=horizontal]:h-2.5"
-          orientation="vertical"
-        >
-          <ScrollArea.Thumb className="flex-1 bg-gray-400 rounded-[10px] relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-[44px] before:min-h-[44px]" />
-        </ScrollArea.Scrollbar>
-        <ScrollArea.Scrollbar
-          className="flex select-none touch-none p-0.5 bg-blackA6 transition-colors duration-[160ms] ease-out hover:bg-blackA8 data-[orientation=vertical]:w-2.5 data-[orientation=horizontal]:flex-col data-[orientation=horizontal]:h-2.5"
-          orientation="horizontal"
-        >
-          <ScrollArea.Thumb className="flex-1 bg-mauve10 rounded-[10px] relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-[44px] before:min-h-[44px]" />
-        </ScrollArea.Scrollbar>
-        <ScrollArea.Corner className="bg-blackA8" />
-      </ScrollArea.Root>
-
-      {/* <div
-        className={`h-full flex flex-col gap-2 overflow-auto border-2 border-dashed border-transparent ${
-          isDragging ? "!border-indigo-500" : ""
-        } ${isDraggingOver ? "bg-gray-300" : ""}`}
-      >
-        {tasksFiltered.map((t) => (
-          <Task task={t} />
-        ))}
-      </div> */}
+      <Droppable droppableId={status}>
+        {(provided) => (
+          <ScrollArea.Root
+            className={`h-full rounded overflow-hidden border-2 border-dashed border-transparent`}
+          >
+            <ScrollArea.Viewport
+              className={`w-full h-full rounded`}
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+            >
+              <div className="flex flex-col gap-4">
+              {tasksFiltered.map((t, index) => (
+                <Task key={t.id} task={t} index={index} />
+              ))}
+              {provided.placeholder}
+              </div>
+            </ScrollArea.Viewport>
+            <ScrollArea.Scrollbar
+              className="flex select-none touch-none p-0.5 bg-gray-200 transition-colors duration-[160ms] ease-out hover:bg-gray-300 data-[orientation=vertical]:w-2.5 data-[orientation=horizontal]:flex-col data-[orientation=horizontal]:h-2.5"
+              orientation="vertical"
+            >
+              <ScrollArea.Thumb className="flex-1 bg-gray-400 rounded-[10px] relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-[44px] before:min-h-[44px]" />
+            </ScrollArea.Scrollbar>
+            <ScrollArea.Scrollbar
+              className="flex select-none touch-none p-0.5 bg-blackA6 transition-colors duration-[160ms] ease-out hover:bg-blackA8 data-[orientation=vertical]:w-2.5 data-[orientation=horizontal]:flex-col data-[orientation=horizontal]:h-2.5"
+              orientation="horizontal"
+            >
+              <ScrollArea.Thumb className="flex-1 bg-mauve10 rounded-[10px] relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-[44px] before:min-h-[44px]" />
+            </ScrollArea.Scrollbar>
+            <ScrollArea.Corner className="bg-blackA8" />
+          </ScrollArea.Root>
+        )}
+      </Droppable>
     </div>
   );
 };

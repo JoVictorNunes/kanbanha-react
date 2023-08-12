@@ -76,6 +76,9 @@ const reducer = (state: typeof initial, action: Action) => {
   }
 };
 
+const min = (a: number, b: number) => (a < b ? a : b);
+const max = (a: number, b: number) => (a > b ? a : b);
+
 const LayoutProvider: React.FC<Props> = (props) => {
   const { children } = props;
   const [state, dispatch] = useReducer(reducer, initial);
@@ -86,7 +89,7 @@ const LayoutProvider: React.FC<Props> = (props) => {
       const height = window.document.documentElement.clientHeight;
 
       const sidebarWidth = 78;
-      const panelWidth = state.input.isPanelOpen ? 0.2 * width : 0;
+      const panelWidth = state.input.isPanelOpen ? min(max(0.2 * width, 3 * sidebarWidth), 4 * sidebarWidth) : 0;
       const mainWidth = width - sidebarWidth - panelWidth;
       const topbarWidth = mainWidth;
 

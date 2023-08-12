@@ -100,7 +100,7 @@ const Project: React.FC = () => {
 
   return (
     <div
-      className={`p-6 absolute`}
+      className={`p-5 absolute`}
       style={{
         width: state.main.width,
         height: state.main.height,
@@ -116,12 +116,14 @@ const Project: React.FC = () => {
               className="h-[4px] bg-blue-600 rounded"
               style={{
                 width:
-                  (finishedTasks.length / tasksOnTheProject.length) * 100 + "%",
+                  (finishedTasks.length / (tasksOnTheProject.length || 1)) *
+                    100 +
+                  "%",
               }}
-            ></div>
+            />
           </div>
           <div className="text-center text-xs text-gray-500">
-            {((finishedTasks.length / tasksOnTheProject.length) * 100).toFixed(
+            {((finishedTasks.length / (tasksOnTheProject.length || 1)) * 100).toFixed(
               0
             ) + "%"}{" "}
             complete
@@ -218,14 +220,21 @@ const Project: React.FC = () => {
         </Tabs.Content>
         <Tabs.Content value="tab2">
           <div>
-            {teamsOnTheProject.map((t) => {
-              return (
-                <Link to={`teams/${t.id}`}>
-                  <div>{t.name}</div>
-                  <div></div>
-                </Link>
-              );
-            })}
+            {teamsOnTheProject.length > 0 ? (
+              teamsOnTheProject.map((t) => {
+                return (
+                  <Link to={`teams/${t.id}`}>
+                    <div>{t.name}</div>
+                    <div></div>
+                  </Link>
+                );
+              })
+            ) : (
+              <div className="text-slate-600">
+                This project has no teams yet. Create one and start working!
+                &#128521;
+              </div>
+            )}
           </div>
         </Tabs.Content>
       </Tabs.Root>
