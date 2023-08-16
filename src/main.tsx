@@ -19,11 +19,13 @@ import Team from "./components/team/component.tsx";
 import "./index.css";
 import Account from "./components/account/component.tsx";
 import SignUp from "./components/signup/component.tsx";
+import ErrorPage from "./components/error/component.tsx";
 
 const router = createBrowserRouter([
   {
     path: "/",
     loader: authLoader,
+    errorElement: <ErrorPage />,
     element: (
       <AuthProvider>
         <SocketProvider>

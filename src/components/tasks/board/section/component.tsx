@@ -1,4 +1,4 @@
-import React, { SyntheticEvent, useState } from "react";
+import React, { SyntheticEvent, useMemo, useState } from "react";
 import { Droppable } from "react-beautiful-dnd";
 import Select, { MultiValue } from "react-select";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
@@ -30,21 +30,38 @@ type SelectValue = MultiValue<{ value: string; label: string }> | null;
 
 const Section: React.FC<Props> = (props) => {
   const { teamId, status, availableHeight } = props;
+
+  // Data
   const { socket, connected } = useSocket();
   const teams = useTeams();
   const tasks = useTasks();
   const members = useMembers();
+
+  // State
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [selectedMembers, setSelectedMembers] = useState<SelectValue>(null);
   const [date, setDate] = useState<string>(
     new Date().toISOString().split("T")[0]
   );
 
-  const team = teams.find((t) => t.id === teamId);
+  const team = useMemo(
+    () => teams.find((t) => t.id === teamId),
+    [teams, teamId]
+  );
+  const teamTasks = useMemo(
+    () => tasks.filter((t) => t.teamId === teamId),
+    [tasks, teamId]
+  );
+  const teamMembers = useMemo(
+    () => members.filter((m) => team?.members?.includes?.(m.id)),
+    [members, team]
+  );
+  const tasksFiltered = useMemo(
+    () => teamTasks.filter((t) => t.status === status),
+    [teamTasks, status]
+  );
+
   if (!team) return null;
-  const teamTasks = tasks.filter((t) => t.teamId === teamId);
-  const teamMembers = members.filter((m) => team.members.includes(m.id));
-  const tasksFiltered = teamTasks.filter((t) => t.status === status);
 
   function renderAddTaskForm() {
     const onSubmit = (e: SyntheticEvent) => {

@@ -11,14 +11,14 @@ const Topbar: React.FC = () => {
   const options = [
     {
       label: "My account",
-      onSelect: (e: Event) => {
+      onSelect: () => {
         console.log("My account selected");
         navigate("/account");
       },
     },
     {
       label: "Sign out",
-      onSelect: (e: Event) => {
+      onSelect: () => {
         console.log("Sign out selected");
       },
     },

@@ -1,4 +1,4 @@
-import React, { SyntheticEvent, useRef, useState } from "react";
+import React, { SyntheticEvent, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import Select, { MultiValue } from "react-select";
 import * as Tabs from "@radix-ui/react-tabs";
@@ -18,43 +18,65 @@ type SelectValue = MultiValue<{ value: string; label: string }>;
 
 const Team: React.FC = () => {
   const { projectId, teamId } = useParams();
+
+  // Data
+  const { state } = useLayout();
   const { socket } = useSocket();
   const projects = useProjects();
   const teams = useTeams();
   const members = useMembers();
-  const [selectedMembers, setSelectedMembers] = useState<SelectValue>([]);
-  const nameRef = useRef<HTMLInputElement | null>(null);
-  const [isAddMemberDialogOpen, setIsAddMemberDialogOpen] = useState(false);
   const tasks = useTasks();
-  const { state } = useLayout();
-  const project = projects.find((p) => p.id === projectId);
-  const team = teams.find((t) => t.id === teamId);
-  const tasksOnTheTeam = tasks.filter((t) => t.teamId === teamId);
-  const finishedTasks = tasksOnTheTeam.filter((t) => t.status === "finished");
 
-  if (!project || !team || !teamId || !projectId) return;
+  // State
+  const [selectedMembers, setSelectedMembers] = useState<SelectValue>([]);
+  const [isAddMemberDialogOpen, setIsAddMemberDialogOpen] = useState(false);
 
-  const onSubmit = (e: SyntheticEvent) => {
-    e.preventDefault();
-    if (!nameRef.current || !socket) return;
-    socket.emit(
-      "teams:create",
-      {
-        projectId,
-        name: nameRef.current.value,
-        members: selectedMembers.map((m) => m.value),
-      },
-      (res) => console.log(res)
-    );
-  };
+  const project = useMemo(
+    () => projects.find((p) => p.id === projectId),
+    [projects, projectId]
+  );
+  const team = useMemo(
+    () => teams.find((t) => t.id === teamId),
+    [teams, teamId]
+  );
+  const teamTasks = useMemo(
+    () => tasks.filter((t) => t.teamId === teamId),
+    [tasks, teamId]
+  );
+  const finishedTasks = useMemo(
+    () => teamTasks.filter((t) => t.status === "finished"),
+    [teamTasks]
+  );
+  const finishedTasksPercentual = useMemo(
+    () => (finishedTasks.length / (teamTasks.length || 1)) * 100,
+    [finishedTasks, teamTasks]
+  );
+
+  if (!project || !team) return null;
 
   const renderAddMembersForm = () => {
     const options = members
-      .filter((m) => !team?.members.includes(m.id))
+      .filter((m) => !team.members.includes(m.id))
       .map((member) => ({
         value: member.id,
         label: member.email,
       }));
+
+    const onSubmit = (e: SyntheticEvent) => {
+      e.preventDefault();
+      if (!socket) return;
+      selectedMembers.forEach(({ value }) => {
+        socket.emit(
+          "teams:addMember",
+          {
+            teamId: team.id,
+            memberId: value,
+          },
+          (res) => console.log(res)
+        );
+      });
+    };
+
     return (
       <form onSubmit={onSubmit} className="flex flex-col gap-2">
         <div className="flex flex-col">
@@ -68,7 +90,7 @@ const Team: React.FC = () => {
         </div>
         <button
           type="submit"
-          className="self-end text-green-800 bg-green-100 hover:bg-green-200 py-1 px-6 rounded font-medium"
+          className="self-end text-blue-800 bg-blue-100 hover:bg-blue-200 py-1 px-6 rounded font-medium"
         >
           Add
         </button>
@@ -89,24 +111,18 @@ const Team: React.FC = () => {
       <div className="flex pb-6 gap-4 h-20">
         <div className="grow font-medium flex flex-col">
           <div className="text-lg mb-2">
-            {project?.name} / {team?.name}
+            {project.name} / {team.name}
           </div>
           <div className="w-full bg-gray-300 rounded overflow-hidden">
             <div
               className="h-[4px] bg-blue-600 w-2/4"
               style={{
-                width:
-                  (finishedTasks.length / (tasksOnTheTeam.length || 1)) * 100 +
-                  "%",
+                width: finishedTasksPercentual + "%",
               }}
             ></div>
           </div>
           <div className="text-center text-xs text-gray-500">
-            {(
-              (finishedTasks.length / (tasksOnTheTeam.length || 1)) *
-              100
-            ).toFixed(0) + "%"}{" "}
-            complete
+            {finishedTasksPercentual.toFixed(0) + "% complete"}
           </div>
         </div>
         <div className="flex flex-col justify-center">
@@ -150,7 +166,7 @@ const Team: React.FC = () => {
         <Tabs.Content value="tab1">Overview</Tabs.Content>
         <Tabs.Content value="tab2" className="bg-gray-50">
           <div className="flex flex-col gap-4 p-4">
-            {team?.members.map((m) => {
+            {team.members.map((m) => {
               const member = members.find((n) => n.id === m);
               return <MemberCard memberId={member?.id as string} />;
             })}

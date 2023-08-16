@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Draggable } from "react-beautiful-dnd";
 import { useMembers, useSocket } from "../../../../hooks";
 import Dropdown from "../../../dropdown/component";
-import type { Task } from "@/contexts/socket/context";
+import type { Member, Task } from "@/contexts/socket/context";
 
 interface Props {
   task: Task;
@@ -11,11 +11,21 @@ interface Props {
 
 const Task: React.FC<Props> = (props) => {
   const { task, index } = props;
+
+  // Data
   const members = useMembers();
   const { socket } = useSocket();
-  const assignees = task.assignees
-    .map((assigneeId) => members.find((member) => member.id === assigneeId))
-    .filter((assignee) => assignee);
+
+  const assignees = useMemo(() => {
+    const assignees: Member[] = [];
+    task.assignees.forEach((assigneeId) => {
+      const assignee = members.find((member) => member.id === assigneeId);
+      if (assignee) {
+        assignees.push(assignee);
+      }
+    });
+    return assignees;
+  }, [task, members]);
 
   const options = [
     {
