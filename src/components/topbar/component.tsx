@@ -1,7 +1,7 @@
 import React from "react";
-import { useAuth, useLayout } from "../../hooks";
-import Dropdown from "../dropdown/component";
 import { useNavigate } from "react-router-dom";
+import { useAuth, useLayout } from "@/hooks";
+import Dropdown from "@/components/dropdown/component";
 
 const Topbar: React.FC = () => {
   const { currentMember } = useAuth();

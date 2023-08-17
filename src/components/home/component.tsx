@@ -1,5 +1,5 @@
 import React from "react";
-import { useLayout } from "../../hooks";
+import { useLayout } from "@/hooks";
 
 const Home: React.FC = () => {
   const { state } = useLayout();

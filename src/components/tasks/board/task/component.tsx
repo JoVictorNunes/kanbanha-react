@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { Draggable } from "react-beautiful-dnd";
-import { useMembers, useSocket } from "../../../../hooks";
-import Dropdown from "../../../dropdown/component";
+import { useMembers, useSocket } from "@/hooks";
+import Dropdown from "@/components/dropdown/component";
 import type { Member, Task } from "@/contexts/socket/context";
 
 interface Props {

@@ -2,7 +2,8 @@ import React, { SyntheticEvent, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import Select, { MultiValue } from "react-select";
 import * as Tabs from "@radix-ui/react-tabs";
-import Dialog from "../dialog/component";
+import Dialog from "@/components/dialog/component";
+import MemberCard from "@/components/members/card/component";
 import {
   useAuth,
   useLayout,
@@ -11,8 +12,7 @@ import {
   useSocket,
   useTasks,
   useTeams,
-} from "../../hooks";
-import MemberCard from "../members/card/component";
+} from "@/hooks";
 
 type SelectValue = MultiValue<{ value: string; label: string }>;
 
@@ -123,9 +123,10 @@ const Project: React.FC = () => {
             />
           </div>
           <div className="text-center text-xs text-gray-500">
-            {((finishedTasks.length / (tasksOnTheProject.length || 1)) * 100).toFixed(
-              0
-            ) + "%"}{" "}
+            {(
+              (finishedTasks.length / (tasksOnTheProject.length || 1)) *
+              100
+            ).toFixed(0) + "%"}{" "}
             complete
           </div>
         </div>

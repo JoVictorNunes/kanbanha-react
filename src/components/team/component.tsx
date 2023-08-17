@@ -2,8 +2,9 @@ import React, { SyntheticEvent, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import Select, { MultiValue } from "react-select";
 import * as Tabs from "@radix-ui/react-tabs";
-import Dialog from "../dialog/component";
-import Tasks from "../tasks/component";
+import Dialog from "@/components/dialog/component";
+import Tasks from "@/components/tasks/component";
+import MemberCard from "@/components/members/card/component";
 import {
   useLayout,
   useMembers,
@@ -11,8 +12,7 @@ import {
   useSocket,
   useTasks,
   useTeams,
-} from "../../hooks";
-import MemberCard from "../members/card/component";
+} from "@/hooks";
 
 type SelectValue = MultiValue<{ value: string; label: string }>;
 

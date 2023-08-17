@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import TaskContext from "./context";
-import { useSocket } from "../../hooks";
+import { useSocket } from "@/hooks";
 import type { Task } from "@/contexts/socket/context";
 
 interface Props {

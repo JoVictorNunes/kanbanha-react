@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Socket, io } from "socket.io-client";
-import { useAuth } from "../../hooks";
+import { useAuth } from "@/hooks";
 import SocketContext, {
   type ClientToServerEvents,
   type ServerToClientsEvents,

@@ -2,7 +2,7 @@ import React from "react";
 import { toast } from "react-toastify";
 import { Formik, Form, Field, ErrorMessage, FieldProps } from "formik";
 import * as Yup from "yup";
-import { useAuth, useLayout, useSocket } from "../../hooks";
+import { useAuth, useLayout, useSocket } from "@/hooks";
 
 const Account: React.FC = () => {
   const { currentMember } = useAuth();

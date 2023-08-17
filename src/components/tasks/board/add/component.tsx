@@ -1,7 +1,7 @@
 import React, { SyntheticEvent, useMemo, useState } from "react";
 import Select, { MultiValue } from "react-select";
-import Dialog from "../../../dialog/component";
-import { useMembers, useSocket, useTeams } from "../../../../hooks";
+import Dialog from "@/components/dialog/component";
+import { useMembers, useSocket, useTeams } from "@/hooks";
 import type { TaskStatuses, UUID } from "@/contexts/socket/context";
 
 type SelectValue = MultiValue<{ value: string; label: string }> | null;

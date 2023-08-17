@@ -1,5 +1,5 @@
-import { useMembers } from "../../../hooks";
 import React from "react";
+import { useMembers } from "@/hooks";
 
 interface Props {
   memberId: string;

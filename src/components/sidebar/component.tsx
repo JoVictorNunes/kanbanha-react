@@ -1,6 +1,6 @@
 import React from "react";
-import { useLayout } from "../../hooks";
 import { Link } from "react-router-dom";
+import { useLayout } from "@/hooks";
 
 const Navbar: React.FC = () => {
   const { state, dispatch } = useLayout();

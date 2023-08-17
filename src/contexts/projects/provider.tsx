@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import ProjectsContext from "./context";
-import { useSocket } from "../../hooks";
+import { useSocket } from "@/hooks";
 import type { Project } from "@/contexts/socket/context";
 
 interface Props {

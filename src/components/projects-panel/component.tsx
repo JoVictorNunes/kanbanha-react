@@ -2,7 +2,7 @@ import React, { SyntheticEvent, useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
 import * as Dialog from "@radix-ui/react-dialog";
 import { toast } from "react-toastify";
-import { useProjects, useSocket } from "../../hooks";
+import { useProjects, useSocket } from "@/hooks";
 
 const Projects: React.FC = () => {
   const projects = useProjects();

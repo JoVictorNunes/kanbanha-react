@@ -1,10 +1,10 @@
 import React, { useMemo } from "react";
 import { Droppable } from "react-beautiful-dnd";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
-import { useTasks, useTeams } from "../../../../hooks";
-import Header from "../header/component";
-import Add from "../add/component";
-import Task from "../task/component";
+import { useTasks, useTeams } from "@/hooks";
+import Header from "@/components/tasks/board/header/component";
+import Add from "@/components/tasks/board/add/component";
+import Task from "@/components/tasks/board/task/component";
 
 interface Props {
   teamId: string;

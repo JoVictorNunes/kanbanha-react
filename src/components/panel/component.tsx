@@ -1,6 +1,6 @@
 import React from "react";
-import { useLayout } from "../../hooks";
-import ProjectsPanel from "../projects-panel/component";
+import { useLayout } from "@/hooks";
+import ProjectsPanel from "@/components/projects-panel/component";
 
 const Panel: React.FC = () => {
   const { state } = useLayout();
