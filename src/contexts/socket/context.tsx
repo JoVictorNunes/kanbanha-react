@@ -1,13 +1,15 @@
 import React from "react";
 import { Socket } from "socket.io-client";
 
-type UUID = string;
+export type UUID = string;
 
 export type Project = {
   id: string;
   name: string;
   ownerId: string;
 };
+
+export type TaskStatuses = "active" | "ongoing" | "review" | "finished";
 
 export type Task = {
   id: UUID;
@@ -19,7 +21,7 @@ export type Task = {
   inReviewAt: Date | null;
   dueDate: Date;
   assignees: UUID[];
-  status: "active" | "ongoing" | "review" | "finished";
+  status: TaskStatuses;
   teamId: UUID;
 };
 
@@ -57,7 +59,7 @@ type TasksCreateData = {
   dueDate: number;
   assignees: UUID[];
   teamId: UUID;
-  status: Task["status"];
+  status: TaskStatuses;
 };
 type TasksUpdateData = {
   id: UUID;
@@ -69,7 +71,7 @@ type TasksUpdateData = {
 type TasksDeleteData = UUID;
 type TasksMoveData = {
   taskId: UUID;
-  status: Task["status"];
+  status: TaskStatuses;
 };
 
 type MemberCreateData = {
