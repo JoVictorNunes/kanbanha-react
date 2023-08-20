@@ -7,9 +7,9 @@ export default {
   },
   panel: {
     top: 0,
-    left: 0,
+    left: 78,
     width: 0,
-    height: 0,
+    height: window.document.documentElement.clientHeight,
   },
   topbar: {
     top: 0,
@@ -29,9 +29,5 @@ export default {
       height: window.document.documentElement.clientHeight,
     },
     isPanelOpen: true,
-    mouse: {
-      x: 0,
-      y: 0,
-    },
   },
 };

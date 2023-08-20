@@ -1,26 +1,32 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { useLayout } from "@/hooks";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { clsx } from 'clsx';
+import { useLayout } from '@/hooks';
 
 const Navbar: React.FC = () => {
-  const { state, dispatch } = useLayout();
+  const { layout, dispatch } = useLayout();
 
   const toggleProjectsPanel = () => {
-    dispatch &&
-      dispatch({
-        type: "SET_PANEL_IS_OPEN",
-        value: !state.input.isPanelOpen,
-      });
+    dispatch({
+      type: 'SET_PANEL_IS_OPEN',
+      value: !layout.input.isPanelOpen,
+    });
   };
+
+  const projectsPanelButtonStyles = clsx({
+    'border-l-blue-700': layout.input.isPanelOpen,
+    'text-blue-700': layout.input.isPanelOpen,
+    'bg-blue-100': layout.input.isPanelOpen,
+  });
 
   return (
     <div
       className={`flex absolute`}
       style={{
-        height: state.sidebar.height,
-        width: state.sidebar.width,
-        left: state.sidebar.left,
-        top: state.sidebar.top,
+        height: layout.sidebar.height,
+        width: layout.sidebar.width,
+        left: layout.sidebar.left,
+        top: layout.sidebar.top,
       }}
     >
       <div className={`flex flex-col gap-8 border-r-2 border-r-gray-100`}>
@@ -31,11 +37,7 @@ const Navbar: React.FC = () => {
           K
         </Link>
         <button
-          className={`px-6 py-3 text-inherit outline-none border-l-4 border-transparent ${
-            state.input.isPanelOpen
-              ? "border-l-blue-700 text-blue-700 bg-blue-100"
-              : ""
-          }`}
+          className={`px-6 py-3 text-inherit outline-none border-l-4 border-transparent ${projectsPanelButtonStyles}`}
           onClick={toggleProjectsPanel}
         >
           <svg

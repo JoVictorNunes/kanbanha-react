@@ -1,8 +1,8 @@
-import React, { SyntheticEvent, useMemo, useState } from "react";
-import Select, { MultiValue } from "react-select";
-import Dialog from "@/components/dialog/component";
-import { useMembers, useSocket, useTeams } from "@/hooks";
-import type { TaskStatuses, UUID } from "@/contexts/socket/context";
+import React, { SyntheticEvent, useMemo, useState } from 'react';
+import Select, { MultiValue } from 'react-select';
+import Dialog from '@/components/dialog/component';
+import { useMembers, useSocket, useTeams } from '@/hooks';
+import type { TaskStatuses, UUID } from '@/contexts/socket/context';
 
 type SelectValue = MultiValue<{ value: string; label: string }> | null;
 
@@ -18,10 +18,7 @@ const Add: React.FC<Props> = (props) => {
   const { socket, connected } = useSocket();
   const teams = useTeams();
   const members = useMembers();
-  const team = useMemo(
-    () => teams.find((t) => t.id === teamId),
-    [teams, teamId]
-  );
+  const team = useMemo(() => teams.find((t) => t.id === teamId), [teams, teamId]);
   const teamMembers = useMemo(
     () => members.filter((m) => team?.members?.includes?.(m.id)),
     [members, team]
@@ -30,20 +27,18 @@ const Add: React.FC<Props> = (props) => {
   // State
   const [open, setOpen] = useState(false);
   const [selectedMembers, setSelectedMembers] = useState<SelectValue>(null);
-  const [date, setDate] = useState<string>(
-    new Date().toISOString().split("T")[0]
-  );
+  const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0]);
 
   function renderForm() {
     const onSubmit = (e: SyntheticEvent) => {
       e.preventDefault();
+      if (!connected) return;
       const formData = new FormData(e.target as HTMLFormElement);
-      const date = new Date(formData.get("date") as string).getTime();
-      const description = (formData.get("description") || "") as string;
-      const dueDate = new Date(formData.get("dueDate") as string).getTime();
-      if (!socket || !connected) return;
+      const date = new Date(formData.get('date') as string).getTime();
+      const description = (formData.get('description') || '') as string;
+      const dueDate = new Date(formData.get('dueDate') as string).getTime();
       socket.emit(
-        "tasks:create",
+        'tasks:create',
         {
           teamId,
           date,
@@ -78,12 +73,7 @@ const Add: React.FC<Props> = (props) => {
             />
           </div>
           <div>
-            <textarea
-              name="description"
-              id="description"
-              cols={30}
-              rows={10}
-            ></textarea>
+            <textarea name="description" id="description" cols={30} rows={10}></textarea>
           </div>
           <div>
             <input type="date" name="dueDate" id="dueDate" />
@@ -123,11 +113,7 @@ const Add: React.FC<Props> = (props) => {
           stroke="currentColor"
           className="w-6 h-6"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 6v12m6-6H6"
-          />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m6-6H6" />
         </svg>
       }
     >

@@ -1,7 +1,7 @@
-import React, { useEffect, useReducer } from "react";
-import context from "./contex";
-import initial from "./initial";
-import { ACTIONS, type Action } from "./enums";
+import React, { useEffect, useReducer } from 'react';
+import context from './contex';
+import initial from './initial';
+import { ACTIONS, type Action } from './enums';
 
 interface Props {
   children: React.ReactNode;
@@ -61,15 +61,6 @@ const reducer = (state: typeof initial, action: Action) => {
         },
       };
     }
-    case ACTIONS.SET_MOUSE: {
-      return {
-        ...state,
-        input: {
-          ...state.input,
-          mouse: action.value,
-        },
-      };
-    }
     default: {
       return state;
     }
@@ -79,6 +70,14 @@ const reducer = (state: typeof initial, action: Action) => {
 const min = (a: number, b: number) => (a < b ? a : b);
 const max = (a: number, b: number) => (a > b ? a : b);
 
+const SIDEBAR_WIDTH = 78;
+const MAX_PANEL_WIDTH = SIDEBAR_WIDTH * 4;
+const MIN_PANEL_WIDTH = SIDEBAR_WIDTH * 3;
+const PANEL_WIDTH_PERCENTAGE = 0.2;
+const TOPBAR_HEIGHT_PERCENTAGE = 0.1;
+
+const isMobile = (width: number) => width < 480;
+
 const LayoutProvider: React.FC<Props> = (props) => {
   const { children } = props;
   const [state, dispatch] = useReducer(reducer, initial);
@@ -87,19 +86,24 @@ const LayoutProvider: React.FC<Props> = (props) => {
     const calcBounds = () => {
       const width = window.document.documentElement.clientWidth;
       const height = window.document.documentElement.clientHeight;
+      const mobile = isMobile(width);
 
-      const sidebarWidth = 78;
-      const panelWidth = state.input.isPanelOpen ? min(max(0.2 * width, 3 * sidebarWidth), 4 * sidebarWidth) : 0;
+      const sidebarWidth = SIDEBAR_WIDTH;
+      const panelWidth = state.input.isPanelOpen
+        ? mobile
+          ? width - sidebarWidth
+          : min(max(PANEL_WIDTH_PERCENTAGE * width, MIN_PANEL_WIDTH), MAX_PANEL_WIDTH)
+        : 0;
       const mainWidth = width - sidebarWidth - panelWidth;
       const topbarWidth = mainWidth;
 
       const sidebarHeight = height;
       const panelHeight = state.input.isPanelOpen ? height : 0;
-      const topbarHeight = 0.1 * height;
+      const topbarHeight = TOPBAR_HEIGHT_PERCENTAGE * height;
       const mainHeight = height - topbarHeight;
 
       dispatch({
-        type: "SET_MAIN",
+        type: 'SET_MAIN',
         value: {
           height: mainHeight,
           left: sidebarWidth + panelWidth,
@@ -109,7 +113,7 @@ const LayoutProvider: React.FC<Props> = (props) => {
       });
 
       dispatch({
-        type: "SET_PANEL",
+        type: 'SET_PANEL',
         value: {
           height: panelHeight,
           left: sidebarWidth,
@@ -119,7 +123,7 @@ const LayoutProvider: React.FC<Props> = (props) => {
       });
 
       dispatch({
-        type: "SET_SIDEBAR",
+        type: 'SET_SIDEBAR',
         value: {
           height: sidebarHeight,
           left: 0,
@@ -129,7 +133,7 @@ const LayoutProvider: React.FC<Props> = (props) => {
       });
 
       dispatch({
-        type: "SET_TOPBAR",
+        type: 'SET_TOPBAR',
         value: {
           height: topbarHeight,
           left: sidebarWidth + panelWidth,
@@ -142,24 +146,13 @@ const LayoutProvider: React.FC<Props> = (props) => {
     const onResize = () => {
       calcBounds();
     };
-    window.addEventListener("resize", onResize);
-    window.addEventListener("mousemove", function (e) {
-      dispatch({
-        type: "SET_MOUSE",
-        value: {
-          x: e.clientX,
-          y: e.clientY,
-        },
-      });
-    });
+    window.addEventListener('resize', onResize);
     return () => {
-      window.removeEventListener("resize", onResize);
+      window.removeEventListener('resize', onResize);
     };
   }, [state.input.isPanelOpen]);
 
-  return (
-    <context.Provider value={{ state, dispatch }}>{children}</context.Provider>
-  );
+  return <context.Provider value={{ layout: state, dispatch }}>{children}</context.Provider>;
 };
 
 export default LayoutProvider;

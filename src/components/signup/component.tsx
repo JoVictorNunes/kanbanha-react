@@ -1,8 +1,10 @@
-import React, { useState } from "react";
-import { ErrorMessage, Field, Form, Formik, FieldProps } from "formik";
-import { Link } from "react-router-dom";
-import * as Yup from "yup";
-import * as AlertDialog from "@radix-ui/react-alert-dialog";
+import React, { useState } from 'react';
+import { ErrorMessage, Field, Form, Formik, FieldProps } from 'formik';
+import { Link } from 'react-router-dom';
+import * as Yup from 'yup';
+import * as AlertDialog from '@radix-ui/react-alert-dialog';
+import * as Popover from '@radix-ui/react-popover';
+import { signUp } from '@/api';
 
 const SignUp: React.FC = () => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -31,8 +33,7 @@ const SignUp: React.FC = () => {
               </svg>
             </AlertDialog.Title>
             <AlertDialog.Description className="mt-4 mb-5 font-light leading-normal">
-              Welcome to Kanbanha! Go to the sign in page and start using your
-              new account. ;)
+              Welcome to Kanbanha! Go to the sign in page and start using your new account. ;)
             </AlertDialog.Description>
             <div className="flex justify-end gap-[25px]">
               <AlertDialog.Action asChild>
@@ -59,45 +60,33 @@ const SignUp: React.FC = () => {
       <h2 className="text-left text-2xl">Sign Up</h2>
 
       <Formik
-        initialValues={{ email: "", name: "", role: "", password: "" }}
+        initialValues={{ email: '', name: '', role: '', password: '' }}
         validationSchema={Yup.object({
-          email: Yup.string()
-            .email("Invalid email address")
-            .required("You must provide an email"),
+          email: Yup.string().email('Invalid email address').required('You must provide an email'),
           name: Yup.string()
-            .min(3, "Must be betwen 3 and 40 characters")
-            .max(40, "Must be betwen 3 and 40 characters")
-            .matches(/[A-Za-z]*/, "Invalid characters")
-            .required("Required"),
+            .min(3, 'Must be betwen 3 and 40 characters')
+            .max(40, 'Must be betwen 3 and 40 characters')
+            .matches(/[A-Za-z]*/, 'Invalid characters')
+            .required('Required'),
           role: Yup.string()
-            .min(3, "Must be betwen 3 and 40 characters")
-            .max(40, "Must be betwen 3 and 40 characters")
-            .matches(/[A-Za-z]*/, "Invalid characters")
-            .required("Required"),
+            .min(3, 'Must be betwen 3 and 40 characters')
+            .max(40, 'Must be betwen 3 and 40 characters')
+            .matches(/[A-Za-z]*/, 'Invalid characters')
+            .required('Required'),
           password: Yup.string()
-            .min(8, "Password must be 8 characters long at least")
-            .max(16, "Password must be 18 characters long at most")
-            .required("Type your password"),
+            .min(8, 'Password must be 8 characters long at least')
+            .max(16, 'Password must be 18 characters long at most')
+            .required('Type your password'),
         })}
         onSubmit={async (values, { setSubmitting, setFieldError }) => {
-          const response = await fetch("http://localhost:3000/signUp", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              email: values.email,
-              name: values.name,
-              role: values.role,
-              password: values.password,
-            }),
-          });
+          const { email, name, password, role } = values;
+          const response = await signUp(email, name, role, password);
           const body = await response.json();
           if (response.status === 201) {
             setShowConfirmDialog(true);
           } else {
             const { message } = body;
-            setFieldError("password", message);
+            setFieldError('password', message);
           }
           setSubmitting(false);
         }}
@@ -141,7 +130,39 @@ const SignUp: React.FC = () => {
             </div>
 
             <div className="flex flex-col">
-              <label htmlFor="role">Role</label>
+              <div className="flex items-center">
+                <label htmlFor="role">Role</label>
+                <Popover.Root>
+                  <Popover.Trigger asChild>
+                    <button className="text-gray-600 data-[state='open']:bg-gray-200 rounded p-1">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="w-4 h-4"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"
+                        />
+                      </svg>
+                    </button>
+                  </Popover.Trigger>
+                  <Popover.Portal>
+                    <Popover.Content
+                      side="top"
+                      align="start"
+                      sideOffset={5}
+                      className="w-[200px] text-xs text-slate-600 px-4 py-1 bg-white border-[1px] border-slate-600 rounded "
+                    >
+                      {'What is your profession or what position you will be performing.'}
+                    </Popover.Content>
+                  </Popover.Portal>
+                </Popover.Root>
+              </div>
               <Field
                 name="role"
                 render={({ field, form }: FieldProps) => (

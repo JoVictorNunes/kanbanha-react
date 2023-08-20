@@ -1,8 +1,9 @@
-import React from "react";
-import * as ScrollArea from "@radix-ui/react-scroll-area";
-import { DragDropContext } from "react-beautiful-dnd";
-import { useSocket } from "@/hooks";
-import Board from "./board/component";
+import React from 'react';
+import * as ScrollArea from '@radix-ui/react-scroll-area';
+import { DragDropContext } from 'react-beautiful-dnd';
+import { useSocket } from '@/hooks';
+import Board from './board/component';
+import { TaskStatuses } from '@/contexts/socket/context';
 
 interface Props {
   teamId: string;
@@ -16,18 +17,13 @@ const Tasks: React.FC<Props> = (props) => {
   return (
     <DragDropContext
       onDragEnd={(result) => {
+        if (!connected || !result.destination) return;
+
         const { draggableId, destination } = result;
-        if (!destination) return;
         const taskId = draggableId;
-        const status = destination.droppableId as
-          | "active"
-          | "ongoing"
-          | "review"
-          | "finished";
+        const status = destination.droppableId as TaskStatuses;
 
-        if (!socket || !connected) return;
-
-        socket.emit("tasks:move", { status, taskId }, (res) => {
+        socket.emit('tasks:move', { status, taskId, index: destination.index }, (res) => {
           console.log(res);
         });
       }}

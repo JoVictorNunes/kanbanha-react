@@ -1,10 +1,10 @@
-import React from "react";
-import type { Member } from "@/contexts/socket/context";
+import React from 'react';
+import type { MemberPayload } from './loader';
 
 const AuthContext = React.createContext<{
   authenticated: boolean;
   authenticating: boolean;
-  currentMember: Member | null;
+  currentMember: MemberPayload | null;
   token: string | null;
 }>({
   authenticated: false,

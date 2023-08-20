@@ -1,5 +1,6 @@
-import React from "react";
-import { Socket } from "socket.io-client";
+import React from 'react';
+import { Socket } from 'socket.io-client';
+import instance from './instance';
 
 export type UUID = string;
 
@@ -9,7 +10,7 @@ export type Project = {
   ownerId: string;
 };
 
-export type TaskStatuses = "active" | "ongoing" | "review" | "finished";
+export type TaskStatuses = 'active' | 'ongoing' | 'review' | 'finished';
 
 export type Task = {
   id: UUID;
@@ -23,6 +24,7 @@ export type Task = {
   assignees: UUID[];
   status: TaskStatuses;
   teamId: UUID;
+  index: number;
 };
 
 export type Team = {
@@ -72,6 +74,7 @@ type TasksDeleteData = UUID;
 type TasksMoveData = {
   taskId: UUID;
   status: TaskStatuses;
+  index: number;
 };
 
 type MemberCreateData = {
@@ -87,77 +90,60 @@ type MemberUpdateData = {
 };
 
 export interface ServerToClientsEvents {
-  "projects:create": (project: Project) => void;
-  "projects:update": (project: Project) => void;
-  "projects:delete": (projectId: UUID) => void;
+  'projects:create': (project: Project) => void;
+  'projects:update': (project: Project) => void;
+  'projects:delete': (projectId: UUID) => void;
 
-  "teams:create": (team: Team) => void;
-  "teams:update": (team: Team) => void;
-  "teams:delete": (teamId: UUID) => void;
+  'teams:create': (team: Team) => void;
+  'teams:update': (team: Team) => void;
+  'teams:delete': (teamId: UUID) => void;
 
-  "tasks:create": (task: Task) => void;
-  "tasks:update": (task: Task) => void;
-  "tasks:delete": (taskId: UUID) => void;
+  'tasks:create': (task: Task) => void;
+  'tasks:update': (task: Task) => void;
+  'tasks:delete': (taskId: UUID) => void;
 
-  "members:create": (member: Member) => void;
-  "members:update": (member: Member) => void;
-  "members:delete": (memberId: UUID) => void;
-  "members:member_connected": (memberId: UUID) => void;
-  "members:member_disconnected": (memberId: UUID) => void;
+  'members:create': (member: Member) => void;
+  'members:update': (member: Member) => void;
+  'members:delete': (memberId: UUID) => void;
+  'members:member_connected': (memberId: UUID) => void;
+  'members:member_disconnected': (memberId: UUID) => void;
 }
 
 export interface ClientToServerEvents {
-  "projects:create": (
-    data: ProjectsCreateData,
-    callback: ResponseCallback
-  ) => void;
-  "projects:read": (callback: ReadCallback<Array<Project>>) => void;
-  "projects:update": (
-    data: ProjectsUpdateData,
-    callback: ResponseCallback
-  ) => void;
-  "projects:delete": (
-    projectId: ProjectsDeleteData,
-    callback: ResponseCallback
-  ) => void;
+  'projects:create': (data: ProjectsCreateData, callback: ResponseCallback) => void;
+  'projects:read': (callback: ReadCallback<Array<Project>>) => void;
+  'projects:update': (data: ProjectsUpdateData, callback: ResponseCallback) => void;
+  'projects:delete': (projectId: ProjectsDeleteData, callback: ResponseCallback) => void;
 
-  "teams:create": (data: TeamsCreateData, callback: ResponseCallback) => void;
-  "teams:read": (callback: ReadCallback<Array<Team>>) => void;
-  "teams:update": (data: TeamsUpdateData, callback: ResponseCallback) => void;
-  "teams:delete": (teamId: TeamsDeleteData, callback: ResponseCallback) => void;
-  "teams:addMember": (
-    data: TeamsAddMemberData,
-    callback: ResponseCallback
-  ) => void;
-  "teams:removeMember": (
-    data: TeamsRemoveMemberData,
-    callback: ResponseCallback
-  ) => void;
+  'teams:create': (data: TeamsCreateData, callback: ResponseCallback) => void;
+  'teams:read': (callback: ReadCallback<Array<Team>>) => void;
+  'teams:update': (data: TeamsUpdateData, callback: ResponseCallback) => void;
+  'teams:delete': (teamId: TeamsDeleteData, callback: ResponseCallback) => void;
+  'teams:addMember': (data: TeamsAddMemberData, callback: ResponseCallback) => void;
+  'teams:removeMember': (data: TeamsRemoveMemberData, callback: ResponseCallback) => void;
 
-  "tasks:create": (data: TasksCreateData, callback: ResponseCallback) => void;
-  "tasks:read": (callback: ReadCallback<Array<Task>>) => void;
-  "tasks:update": (data: TasksUpdateData, callback: ResponseCallback) => void;
-  "tasks:delete": (taskId: TasksDeleteData, callback: ResponseCallback) => void;
-  "tasks:move": (data: TasksMoveData, callback: ResponseCallback) => void;
+  'tasks:create': (data: TasksCreateData, callback: ResponseCallback) => void;
+  'tasks:read': (callback: ReadCallback<Array<Task>>) => void;
+  'tasks:update': (data: TasksUpdateData, callback: ResponseCallback) => void;
+  'tasks:delete': (taskId: TasksDeleteData, callback: ResponseCallback) => void;
+  'tasks:move': (data: TasksMoveData, callback: ResponseCallback) => void;
 
-  "members:create": (
-    data: MemberCreateData,
-    callback: ResponseCallback
-  ) => void;
-  "members:read": (callback: ReadCallback<Array<Member>>) => void;
-  "members:update": (
-    data: MemberUpdateData,
-    callback: ResponseCallback
-  ) => void;
-  "members:delete": (callback: ResponseCallback) => void;
+  'members:create': (data: MemberCreateData, callback: ResponseCallback) => void;
+  'members:read': (callback: ReadCallback<Array<Member>>) => void;
+  'members:update': (data: MemberUpdateData, callback: ResponseCallback) => void;
+  'members:delete': (callback: ResponseCallback) => void;
 }
 
+export type SocketType = Socket<ServerToClientsEvents, ClientToServerEvents>;
+
 const SocketContext = React.createContext<{
-  socket: Socket<ServerToClientsEvents, ClientToServerEvents> | null;
+  socket: SocketType;
   connected: boolean;
+  isReadyToConnect: boolean;
 }>({
-  socket: null,
+  socket: instance,
   connected: false,
+  isReadyToConnect: false,
 });
 
 export default SocketContext;

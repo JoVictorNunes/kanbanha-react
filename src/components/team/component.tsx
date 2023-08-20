@@ -1,18 +1,11 @@
-import React, { SyntheticEvent, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
-import Select, { MultiValue } from "react-select";
-import * as Tabs from "@radix-ui/react-tabs";
-import Dialog from "@/components/dialog/component";
-import Tasks from "@/components/tasks/component";
-import MemberCard from "@/components/members/card/component";
-import {
-  useLayout,
-  useMembers,
-  useProjects,
-  useSocket,
-  useTasks,
-  useTeams,
-} from "@/hooks";
+import React, { SyntheticEvent, useMemo, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import Select, { MultiValue } from 'react-select';
+import * as Tabs from '@radix-ui/react-tabs';
+import Dialog from '@/components/dialog/component';
+import Tasks from '@/components/tasks/component';
+import MemberCard from '@/components/members/card/component';
+import { useLayout, useMembers, useProjects, useSocket, useTasks, useTeams } from '@/hooks';
 
 type SelectValue = MultiValue<{ value: string; label: string }>;
 
@@ -20,8 +13,8 @@ const Team: React.FC = () => {
   const { projectId, teamId } = useParams();
 
   // Data
-  const { state } = useLayout();
-  const { socket } = useSocket();
+  const { layout } = useLayout();
+  const { socket, connected } = useSocket();
   const projects = useProjects();
   const teams = useTeams();
   const members = useMembers();
@@ -31,20 +24,11 @@ const Team: React.FC = () => {
   const [selectedMembers, setSelectedMembers] = useState<SelectValue>([]);
   const [isAddMemberDialogOpen, setIsAddMemberDialogOpen] = useState(false);
 
-  const project = useMemo(
-    () => projects.find((p) => p.id === projectId),
-    [projects, projectId]
-  );
-  const team = useMemo(
-    () => teams.find((t) => t.id === teamId),
-    [teams, teamId]
-  );
-  const teamTasks = useMemo(
-    () => tasks.filter((t) => t.teamId === teamId),
-    [tasks, teamId]
-  );
+  const project = useMemo(() => projects.find((p) => p.id === projectId), [projects, projectId]);
+  const team = useMemo(() => teams.find((t) => t.id === teamId), [teams, teamId]);
+  const teamTasks = useMemo(() => tasks.filter((t) => t.teamId === teamId), [tasks, teamId]);
   const finishedTasks = useMemo(
-    () => teamTasks.filter((t) => t.status === "finished"),
+    () => teamTasks.filter((t) => t.status === 'finished'),
     [teamTasks]
   );
   const finishedTasksPercentual = useMemo(
@@ -64,10 +48,10 @@ const Team: React.FC = () => {
 
     const onSubmit = (e: SyntheticEvent) => {
       e.preventDefault();
-      if (!socket) return;
+      if (!connected) return;
       selectedMembers.forEach(({ value }) => {
         socket.emit(
-          "teams:addMember",
+          'teams:addMember',
           {
             teamId: team.id,
             memberId: value,
@@ -102,10 +86,10 @@ const Team: React.FC = () => {
     <div
       className={`p-5 flex flex-col absolute overflow-hidden`}
       style={{
-        width: state.main.width,
-        height: state.main.height,
-        left: state.main.left,
-        top: state.main.top,
+        width: layout.main.width,
+        height: layout.main.height,
+        left: layout.main.left,
+        top: layout.main.top,
       }}
     >
       <div className="flex pb-6 gap-4 h-20">
@@ -117,12 +101,12 @@ const Team: React.FC = () => {
             <div
               className="h-[4px] bg-blue-600 w-2/4"
               style={{
-                width: finishedTasksPercentual + "%",
+                width: finishedTasksPercentual + '%',
               }}
             ></div>
           </div>
           <div className="text-center text-xs text-gray-500">
-            {finishedTasksPercentual.toFixed(0) + "% complete"}
+            {finishedTasksPercentual.toFixed(0) + '% complete'}
           </div>
         </div>
         <div className="flex flex-col justify-center">
@@ -141,9 +125,9 @@ const Team: React.FC = () => {
       <Tabs.Root
         defaultValue="tab1"
         className="flex flex-col overflow-hidden"
-        style={{ height: state.main.height - 120 }}
+        style={{ height: layout.main.height - 120 }}
       >
-        <Tabs.List style={{ height: 0.1 * (state.main.height - 120) }}>
+        <Tabs.List style={{ height: 0.1 * (layout.main.height - 120) }}>
           <Tabs.Trigger
             value="tab1"
             className="p-3 border-b-2 border-b-transparent data-[state=active]:border-b-blue-700"
@@ -172,14 +156,8 @@ const Team: React.FC = () => {
             })}
           </div>
         </Tabs.Content>
-        <Tabs.Content
-          value="tab3"
-          style={{ height: 0.9 * (state.main.height - 120) }}
-        >
-          <Tasks
-            teamId={teamId as string}
-            availableHeight={0.9 * (state.main.height - 120)}
-          />
+        <Tabs.Content value="tab3" style={{ height: 0.9 * (layout.main.height - 120) }}>
+          <Tasks teamId={teamId as string} availableHeight={0.9 * (layout.main.height - 120)} />
         </Tabs.Content>
       </Tabs.Root>
     </div>

@@ -1,9 +1,9 @@
-import React, { SyntheticEvent, useRef, useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import Select, { MultiValue } from "react-select";
-import * as Tabs from "@radix-ui/react-tabs";
-import Dialog from "@/components/dialog/component";
-import MemberCard from "@/components/members/card/component";
+import React, { SyntheticEvent, useRef, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import Select, { MultiValue } from 'react-select';
+import * as Tabs from '@radix-ui/react-tabs';
+import Dialog from '@/components/dialog/component';
+import MemberCard from '@/components/members/card/component';
 import {
   useAuth,
   useLayout,
@@ -12,70 +12,70 @@ import {
   useSocket,
   useTasks,
   useTeams,
-} from "@/hooks";
+} from '@/hooks';
 
 type SelectValue = MultiValue<{ value: string; label: string }>;
 
 const Project: React.FC = () => {
   const { projectId } = useParams();
+
+  // Data
   const { currentMember } = useAuth();
-  const { socket } = useSocket();
+  const { socket, connected } = useSocket();
+  const { layout } = useLayout();
   const projects = useProjects();
   const teams = useTeams();
   const members = useMembers();
   const tasks = useTasks();
+
+  // State
   const [selectedMembers, setSelectedMembers] = useState<SelectValue>([]);
   const [isNewTeamDialogOpen, setIsNewTeamDialogOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const nameRef = useRef<HTMLInputElement | null>(null);
-  const { state } = useLayout();
 
-  const project = projects.find((p) => p.id === projectId);
-  const teamsOnTheProject = teams.filter((t) => t.projectId === projectId);
-  const tasksOnTheProject = tasks.filter((t) =>
-    teamsOnTheProject.some((team) => team.id === t.teamId)
+  const project = projects.find((project) => project.id === projectId);
+  const teamsInTheProject = teams.filter((task) => task.projectId === projectId);
+  const tasksInTheProject = tasks.filter((task) =>
+    teamsInTheProject.some((team) => team.id === task.teamId)
   );
-  const finishedTasks = tasksOnTheProject.filter(
-    (t) => t.status === "finished"
-  );
+  const finishedTasks = tasksInTheProject.filter((task) => task.status === 'finished');
+  const finishedTasksPercentage = (finishedTasks.length / (tasksInTheProject.length || 1)) * 100;
 
   if (!project || !projectId) {
-    return (
-      <div className="font-light">
-        This project does not exist or was deleted.
-      </div>
-    );
+    return <div className="font-light">This project does not exist or was deleted.</div>;
   }
 
-  const onSubmit = (e: SyntheticEvent) => {
-    e.preventDefault();
-    if (!nameRef.current || !socket) return;
-    socket.emit(
-      "teams:create",
-      {
-        projectId,
-        name: nameRef.current.value,
-        members: selectedMembers.map((m) => m.value),
-      },
-      (response) => console.log(response)
-    );
-  };
-
   const renderCreateTeamForm = () => {
+    const onSubmit = (e: SyntheticEvent) => {
+      e.preventDefault();
+      if (!nameRef.current || !connected) return;
+      socket.emit(
+        'teams:create',
+        {
+          projectId,
+          name: nameRef.current.value,
+          members: selectedMembers.map((m) => m.value),
+        },
+        (response) => console.log(response)
+      );
+    };
+
     const options = members
       .filter((m) => m.id !== currentMember?.id)
       .map((member) => ({
         value: member.id,
         label: member.name,
       }));
+
     return (
       <form onSubmit={onSubmit} className="flex flex-col gap-2">
         <div className="flex flex-col">
-          <label htmlFor="name">Team Name</label>
+          <label htmlFor="name">Name</label>
           <input
             type="text"
             name="name"
-            className="outline-none border-2 border-gray-100 rounded p-2"
+            className="outline-none border-[1px] border-gray-300 rounded p-2 focus:shadow-[0px_0px_0px_1px] focus:shadow-blue-600 focus:border-blue-600"
             ref={nameRef}
           />
         </div>
@@ -90,9 +90,9 @@ const Project: React.FC = () => {
         </div>
         <button
           type="submit"
-          className="self-end text-green-800 bg-green-100 hover:bg-green-200 py-1 px-6 rounded font-medium"
+          className="self-end text-blue-800 bg-blue-100 hover:bg-blue-200 py-1 px-6 rounded font-medium focus:shadow-[0px_0px_0px_2px] focus:shadow-blue-600 outline-none"
         >
-          Criar
+          Create
         </button>
       </form>
     );
@@ -102,41 +102,34 @@ const Project: React.FC = () => {
     <div
       className={`p-5 absolute`}
       style={{
-        width: state.main.width,
-        height: state.main.height,
-        left: state.main.left,
-        top: state.main.top,
+        width: layout.main.width,
+        height: layout.main.height,
+        left: layout.main.left,
+        top: layout.main.top,
       }}
     >
       <div className="flex pb-6 gap-4">
         <div className="grow font-medium flex flex-col">
-          <div className="text-lg mb-2">{project?.name}</div>
+          <div className="text-lg mb-2">{project.name}</div>
           <div className="w-full">
             <div
-              className="h-[4px] bg-blue-600 rounded"
+              className="h-[4px] bg-blue-600 rounded transition-all"
               style={{
-                width:
-                  (finishedTasks.length / (tasksOnTheProject.length || 1)) *
-                    100 +
-                  "%",
+                width: finishedTasksPercentage + '%',
               }}
             />
           </div>
           <div className="text-center text-xs text-gray-500">
-            {(
-              (finishedTasks.length / (tasksOnTheProject.length || 1)) *
-              100
-            ).toFixed(0) + "%"}{" "}
-            complete
+            {finishedTasksPercentage.toFixed(0) + '% complete'}
           </div>
         </div>
         <div className="flex flex-col justify-center">
           <Dialog
             open={isNewTeamDialogOpen}
             onOpenChange={setIsNewTeamDialogOpen}
-            description={`Create a new team for the ${project?.name} project.`}
-            title="Create New Team"
-            triggerText="Create Team"
+            description={`Create a new team for the ${project.name} project.`}
+            title="New Team"
+            triggerText="New Team"
             triggerClassName="bg-blue-600 text-white rounded px-4 py-2"
           >
             {renderCreateTeamForm()}
@@ -162,12 +155,12 @@ const Project: React.FC = () => {
           <div>
             <div className="text-xs text-gray-500 font-bold">Name</div>
             <div contentEditable={editing} id="projectName">
-              {project?.name}
+              {project.name}
             </div>
           </div>
           <div>
             <div className="text-xs text-gray-500 font-bold">Owner</div>
-            <MemberCard memberId={project?.ownerId as string} />
+            <MemberCard memberId={project.ownerId as string} />
           </div>
           <div className="flex gap-2">
             {editing ? (
@@ -182,9 +175,8 @@ const Project: React.FC = () => {
                 </button>
                 <button
                   onClick={() => {
-                    socket?.emit("projects:delete", projectId, (response) =>
-                      console.log(response)
-                    );
+                    if (!connected) return;
+                    socket.emit('projects:delete', projectId, (response) => console.log(response));
                   }}
                   className="border-[1px] border-red-600 bg-red-600 text-white rounded py-1 px-4 hover:bg-red-700"
                 >
@@ -193,13 +185,10 @@ const Project: React.FC = () => {
                 <button
                   onClick={() => {
                     setEditing(false);
-                    const name =
-                      document.getElementById("projectName")?.innerText;
-                    if (!name || name === "") return;
-                    socket?.emit(
-                      "projects:update",
-                      { id: projectId, name },
-                      (response) => console.log(response)
+                    const name = document.getElementById('projectName')?.innerText;
+                    if (!name || !connected) return;
+                    socket.emit('projects:update', { id: projectId, name }, (response) =>
+                      console.log(response)
                     );
                   }}
                   className="border-[1px] border-blue-600 bg-blue-600 text-white rounded py-1 px-4 hover:bg-blue-700"
@@ -221,8 +210,8 @@ const Project: React.FC = () => {
         </Tabs.Content>
         <Tabs.Content value="tab2">
           <div>
-            {teamsOnTheProject.length > 0 ? (
-              teamsOnTheProject.map((t) => {
+            {teamsInTheProject.length > 0 ? (
+              teamsInTheProject.map((t) => {
                 return (
                   <Link to={`teams/${t.id}`}>
                     <div>{t.name}</div>
@@ -232,8 +221,7 @@ const Project: React.FC = () => {
               })
             ) : (
               <div className="text-slate-600">
-                This project has no teams yet. Create one and start working!
-                &#128521;
+                This project has no teams yet. Create one and start working! &#128521;
               </div>
             )}
           </div>

@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
-import TeamsContext from "./context";
-import { useSocket } from "@/hooks";
-import type { Team } from "@/contexts/socket/context";
+import React, { useEffect, useRef, useState } from 'react';
+import TeamsContext from './context';
+import { useSocket } from '@/hooks';
+import type { Team } from '@/contexts/socket/context';
 
 interface Props {
   children: React.ReactNode;
@@ -14,7 +14,6 @@ const TeamsProvider: React.FC<Props> = (props) => {
   const isInititalTeamsRead = useRef(false);
 
   useEffect(() => {
-    if (!connected || !socket) return;
     const onCreate = (team: Team) => {
       setTeams([...teams, team]);
     };
@@ -25,27 +24,25 @@ const TeamsProvider: React.FC<Props> = (props) => {
     const onDelete = (teamId: string) => {
       setTeams(teams.filter((t) => t.id !== teamId));
     };
-    socket.on("teams:create", onCreate);
-    socket.on("teams:update", onUpdate);
-    socket.on("teams:delete", onDelete);
+    socket.on('teams:create', onCreate);
+    socket.on('teams:update', onUpdate);
+    socket.on('teams:delete', onDelete);
     return () => {
-      socket.off("teams:create", onCreate);
-      socket.off("teams:update", onUpdate);
-      socket.off("teams:delete", onDelete);
+      socket.off('teams:create', onCreate);
+      socket.off('teams:update', onUpdate);
+      socket.off('teams:delete', onDelete);
     };
-  }, [connected, socket, teams]);
+  }, [socket, teams]);
 
   useEffect(() => {
-    if (!connected || !socket || isInititalTeamsRead.current) return;
-    socket.emit("teams:read", (teams: Array<Team>) => {
+    if (!connected || isInititalTeamsRead.current) return;
+    socket.emit('teams:read', (teams: Array<Team>) => {
       setTeams(teams);
       isInititalTeamsRead.current = true;
     });
   }, [connected, socket]);
 
-  return (
-    <TeamsContext.Provider value={teams}>{children}</TeamsContext.Provider>
-  );
+  return <TeamsContext.Provider value={teams}>{children}</TeamsContext.Provider>;
 };
 
 export default TeamsProvider;

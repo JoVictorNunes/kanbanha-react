@@ -1,11 +1,10 @@
 export const ACTIONS = {
-  SET_SIDEBAR: "SET_SIDEBAR",
-  SET_PANEL: "SET_PANEL",
-  SET_TOPBAR: "SET_TOPBAR",
-  SET_MAIN: "SET_MAIN",
-  SET_BROWSER: "SET_BROWSER",
-  SET_PANEL_IS_OPEN: "SET_PANEL_IS_OPEN",
-  SET_MOUSE: "SET_MOUSE",
+  SET_SIDEBAR: 'SET_SIDEBAR',
+  SET_PANEL: 'SET_PANEL',
+  SET_TOPBAR: 'SET_TOPBAR',
+  SET_MAIN: 'SET_MAIN',
+  SET_BROWSER: 'SET_BROWSER',
+  SET_PANEL_IS_OPEN: 'SET_PANEL_IS_OPEN',
 } as const;
 
 type ActionValues = {
@@ -38,10 +37,6 @@ type ActionValues = {
     height: number;
   };
   SET_PANEL_IS_OPEN: boolean;
-  SET_MOUSE: {
-    x: number;
-    y: number;
-  };
 };
 
 export type Action = {

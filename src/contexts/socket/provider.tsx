@@ -1,10 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { Socket, io } from "socket.io-client";
-import { useAuth } from "@/hooks";
-import SocketContext, {
-  type ClientToServerEvents,
-  type ServerToClientsEvents,
-} from "./context";
+import React, { useEffect, useState } from 'react';
+import { useAuth } from '@/hooks';
+import instance from './instance';
+import SocketContext, { type SocketType } from './context';
 
 interface Props {
   children: React.ReactNode;
@@ -12,32 +9,26 @@ interface Props {
 
 const SocketProvider: React.FC<Props> = (props) => {
   const { children } = props;
-  const [socket, setSocket] = useState<Socket | null>(null);
+  const [socket] = useState<SocketType>(instance);
   const [connected, setConnected] = useState(false);
+  const [isReadyToConnect, setIsReadyToConnect] = useState(false);
   const { authenticated, token } = useAuth();
 
   useEffect(() => {
-    if (authenticated && !socket) {
-      const socket: Socket<ServerToClientsEvents, ClientToServerEvents> = io(
-        "http://localhost:3000",
-        {
-          auth: {
-            token: token,
-          },
-          autoConnect: false,
-        }
-      );
-      socket.on("connect", () => setConnected(true));
-      socket.on("disconnect", () => setConnected(false));
-      setSocket(socket);
+    if (authenticated) {
+      socket.auth = { token };
+      socket.on('connect', () => setConnected(true));
+      socket.on('disconnect', () => setConnected(false));
+      setIsReadyToConnect(true);
     }
-  }, [authenticated, token, socket]);
+  }, [authenticated, socket, token]);
 
   return (
     <SocketContext.Provider
       value={{
         socket,
         connected,
+        isReadyToConnect,
       }}
     >
       {children}

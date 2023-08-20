@@ -1,7 +1,8 @@
-import React from "react";
-import { ErrorMessage, Field, Form, Formik, FieldProps } from "formik";
-import { useNavigate, Link } from "react-router-dom";
-import * as Yup from "yup";
+import React from 'react';
+import { ErrorMessage, Field, Form, Formik, FieldProps } from 'formik';
+import { useNavigate, Link } from 'react-router-dom';
+import * as Yup from 'yup';
+import { signIn } from '@/api';
 
 const SignIn: React.FC = () => {
   const navigate = useNavigate();
@@ -15,35 +16,25 @@ const SignIn: React.FC = () => {
       <h2 className="text-left text-2xl">Sign In</h2>
 
       <Formik
-        initialValues={{ email: "", password: "" }}
+        initialValues={{ email: '', password: '' }}
         validationSchema={Yup.object({
-          email: Yup.string()
-            .email("Invalid email address")
-            .required("You must provide an email"),
+          email: Yup.string().email('Invalid email address').required('You must provide an email'),
           password: Yup.string()
-            .min(8, "Password must be 8 characters long at least")
-            .max(16, "Password must be 18 characters long at most")
-            .required("Type your password"),
+            .min(8, 'Password must be 8 characters long at least')
+            .max(16, 'Password must be 18 characters long at most')
+            .required('Type your password'),
         })}
         onSubmit={async (values, { setSubmitting, setFieldError }) => {
-          const response = await fetch("http://localhost:3000/signIn", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              email: values.email,
-              password: values.password,
-            }),
-          });
+          const { email, password } = values;
+          const response = await signIn(email, password);
           const body = await response.json();
           if (response.status === 201) {
             const { token } = body;
-            localStorage.setItem("token", token);
-            navigate("/");
+            localStorage.setItem('token', token);
+            navigate('/');
           } else {
             const { message } = body;
-            setFieldError("password", message);
+            setFieldError('password', message);
           }
           setSubmitting(false);
         }}

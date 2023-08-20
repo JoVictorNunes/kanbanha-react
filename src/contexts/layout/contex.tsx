@@ -1,13 +1,15 @@
-import React from "react";
-import initial from "./initial";
-import type { Action } from "./enums";
+import React from 'react';
+import initial from './initial';
+import type { Action } from './enums';
 
 const context = React.createContext<{
-  state: typeof initial;
-  dispatch: React.Dispatch<Action> | null;
+  layout: typeof initial;
+  dispatch: React.Dispatch<Action>;
 }>({
-  state: initial,
-  dispatch: null,
+  layout: initial,
+  dispatch: () => {
+    return;
+  },
 });
 
 export default context;

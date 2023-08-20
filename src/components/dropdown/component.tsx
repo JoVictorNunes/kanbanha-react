@@ -1,17 +1,19 @@
-import React from "react";
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import React from 'react';
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 
 interface Props {
   options: Array<{
     label: string;
     onSelect: (e: Event) => void;
+    disabled?: boolean;
   }>;
   children?: React.ReactNode;
-  side?: "top" | "right" | "bottom" | "left";
+  side?: 'top' | 'right' | 'bottom' | 'left';
 }
 
 const Dropdown: React.FC<Props> = (props) => {
-  const { options, children, side = "right" } = props;
+  const { options, children, side = 'right' } = props;
+
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
@@ -44,8 +46,9 @@ const Dropdown: React.FC<Props> = (props) => {
         >
           {options.map((option) => (
             <DropdownMenu.Item
+              disabled={option.disabled}
               onSelect={option.onSelect}
-              className="outline-none p-2 data-[highlighted]:bg-blue-600 data-[highlighted]:text-white"
+              className="outline-none cursor-pointer p-2 data-[highlighted]:bg-blue-600 data-[highlighted]:text-white data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed"
             >
               {option.label}
             </DropdownMenu.Item>

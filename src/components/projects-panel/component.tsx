@@ -1,57 +1,56 @@
-import React, { SyntheticEvent, useRef, useState } from "react";
-import { NavLink } from "react-router-dom";
-import * as Dialog from "@radix-ui/react-dialog";
-import { toast } from "react-toastify";
-import { useProjects, useSocket } from "@/hooks";
+import React, { SyntheticEvent, useRef, useState } from 'react';
+import { NavLink } from 'react-router-dom';
+import * as Dialog from '@radix-ui/react-dialog';
+import { toast } from 'react-toastify';
+import { useProjects, useSocket } from '@/hooks';
 
 const Projects: React.FC = () => {
   const projects = useProjects();
-  const { socket } = useSocket();
+  const { socket, connected } = useSocket();
   const nameRef = useRef<HTMLInputElement>(null);
   const [isAddingProject, setIsAddingProject] = useState(false);
 
-  const onSubmit = (e: SyntheticEvent) => {
-    e.preventDefault();
-    if (!socket || !nameRef.current) return;
-    setIsAddingProject(false);
-    socket.emit(
-      "projects:create",
-      { name: nameRef.current.value },
-      (response: { code: number }) => {
-        if (response.code === 201) {
-          toast.success("Project created!");
+  const renderNewProjectForm = () => {
+    const onSubmit = (e: SyntheticEvent) => {
+      e.preventDefault();
+      if (!connected || !nameRef.current) return;
+      setIsAddingProject(false);
+      socket.emit(
+        'projects:create',
+        { name: nameRef.current.value },
+        (response: { code: number }) => {
+          if (response.code === 201) {
+            toast.success('Project created!');
+          }
         }
-      }
+      );
+    };
+    return (
+      <form onSubmit={onSubmit} className="flex flex-col gap-2">
+        <div className="flex flex-col">
+          <label htmlFor="name">Name</label>
+          <input
+            type="text"
+            name="name"
+            className="outline-none border-[1px] border-gray-300 rounded-lg p-2"
+            ref={nameRef}
+            required
+            maxLength={12}
+            minLength={3}
+          />
+        </div>
+        <button
+          type="submit"
+          className="self-end text-blue-700 bg-blue-100 hover:bg-blue-200 py-1 px-6 rounded font-medium focus:shadow-[0px_0px_0px_2px] focus:shadow-blue-600 outline-none"
+        >
+          Create
+        </button>
+      </form>
     );
   };
 
-  const renderNewProjectForm = () => (
-    <form onSubmit={onSubmit} className="flex flex-col gap-2">
-      <div className="flex flex-col">
-        <label htmlFor="name">Project Name</label>
-        <input
-          type="text"
-          name="name"
-          className="outline-none border-[1px] border-gray-300 rounded-lg p-2"
-          ref={nameRef}
-          required
-          maxLength={12}
-          minLength={3}
-        />
-      </div>
-      <button
-        type="submit"
-        className="self-end text-blue-700 bg-blue-100 hover:bg-blue-200 py-1 px-6 rounded font-medium"
-      >
-        Criar
-      </button>
-    </form>
-  );
-
   return (
-    <div
-      className={`flex flex-col gap-6 p-5 border-r-2 border-r-gray-100 w-full h-full`}
-    >
+    <div className={`flex flex-col gap-6 p-5 border-r-2 border-r-gray-100 w-full h-full`}>
       <div className={`grow flex flex-col gap-8`}>
         <div>
           <h2 className={`text-xl pb-2`}>Projects</h2>
@@ -83,10 +82,7 @@ const Projects: React.FC = () => {
         </div>
       </div>
       <div>
-        <Dialog.Root
-          open={isAddingProject}
-          onOpenChange={(open) => setIsAddingProject(open)}
-        >
+        <Dialog.Root open={isAddingProject} onOpenChange={(open) => setIsAddingProject(open)}>
           <Dialog.Trigger asChild>
             <button
               onClick={() => setIsAddingProject(true)}
@@ -100,11 +96,7 @@ const Projects: React.FC = () => {
                 stroke="currentColor"
                 className="w-6 h-6"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 6v12m6-6H6"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m6-6H6" />
               </svg>
               <span>New Project</span>
             </button>
@@ -112,9 +104,7 @@ const Projects: React.FC = () => {
           <Dialog.Portal>
             <Dialog.Overlay className="bg-opacity-30 bg-black data-[state=open]:animate-overlayShow fixed inset-0" />
             <Dialog.Content className="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none">
-              <Dialog.Title className="font-medium text-lg">
-                New Project
-              </Dialog.Title>
+              <Dialog.Title className="font-medium text-lg">New Project</Dialog.Title>
               <Dialog.Description className="mb-5 text-sm text-gray-700">
                 Create a new project.
               </Dialog.Description>
@@ -129,11 +119,7 @@ const Projects: React.FC = () => {
                     stroke="currentColor"
                     className="w-6 h-6"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </Dialog.Close>

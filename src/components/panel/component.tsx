@@ -1,17 +1,17 @@
-import React from "react";
-import { useLayout } from "@/hooks";
-import ProjectsPanel from "@/components/projects-panel/component";
+import React from 'react';
+import { useLayout } from '@/hooks';
+import ProjectsPanel from '@/components/projects-panel/component';
 
 const Panel: React.FC = () => {
-  const { state } = useLayout();
+  const { layout } = useLayout();
   return (
     <div
       className="absolute overflow-hidden"
       style={{
-        height: state.panel.height,
-        width: state.panel.width,
-        left: state.panel.left,
-        top: state.panel.top,
+        height: layout.panel.height,
+        width: layout.panel.width,
+        left: layout.panel.left,
+        top: layout.panel.top,
       }}
     >
       <ProjectsPanel />

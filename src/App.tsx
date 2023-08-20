@@ -1,16 +1,18 @@
-import { Outlet } from "react-router-dom";
-import Sidebar from "@/components/sidebar/component";
-import Topbar from "@/components/topbar/component";
-import { useSocket } from "@/hooks";
-import { useEffect } from "react";
-import Panel from "@/components/panel/component";
+import { useEffect } from 'react';
+import { Outlet } from 'react-router-dom';
+import { useSocket } from '@/hooks';
+import Sidebar from '@/components/sidebar/component';
+import Topbar from '@/components/topbar/component';
+import Panel from '@/components/panel/component';
 
 function App() {
-  const { socket } = useSocket();
+  const { socket, isReadyToConnect } = useSocket();
 
   useEffect(() => {
-    socket?.connect();
-  }, [socket]);
+    if (isReadyToConnect) {
+      socket.connect();
+    }
+  }, [isReadyToConnect, socket]);
 
   return (
     <div className="h-full relative">

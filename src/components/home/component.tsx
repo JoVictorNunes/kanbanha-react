@@ -1,15 +1,16 @@
-import React from "react";
-import { useLayout } from "@/hooks";
+import React from 'react';
+import { useLayout } from '@/hooks';
 
 const Home: React.FC = () => {
-  const { state } = useLayout();
+  const { layout } = useLayout();
+
   return (
     <div
       style={{
-        height: state.main.height,
-        width: state.main.width,
-        left: state.main.left,
-        top: state.main.top,
+        height: layout.main.height,
+        width: layout.main.width,
+        left: layout.main.left,
+        top: layout.main.top,
       }}
       className="absolute flex justify-center items-center"
     >
