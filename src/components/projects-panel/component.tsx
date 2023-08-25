@@ -1,8 +1,10 @@
 import React, { SyntheticEvent, useRef, useState } from 'react';
+import clsx from 'clsx';
 import { NavLink } from 'react-router-dom';
-import * as Dialog from '@radix-ui/react-dialog';
 import { toast } from 'react-toastify';
 import { useProjects, useSocket } from '@/hooks';
+import Dialog from '@/components/dialog/component';
+import PlusSmal from '@/svgs/PlusSmal';
 
 const Projects: React.FC = () => {
   const projects = useProjects();
@@ -14,16 +16,12 @@ const Projects: React.FC = () => {
     const onSubmit = (e: SyntheticEvent) => {
       e.preventDefault();
       if (!connected || !nameRef.current) return;
-      setIsAddingProject(false);
-      socket.emit(
-        'projects:create',
-        { name: nameRef.current.value },
-        (response: { code: number }) => {
-          if (response.code === 201) {
-            toast.success('Project created!');
-          }
+      socket.emit('projects:create', { name: nameRef.current.value }, (response) => {
+        if (response.code === 201) {
+          setIsAddingProject(false);
+          toast.success('Project created!');
         }
-      );
+      });
     };
     return (
       <form onSubmit={onSubmit} className="flex flex-col gap-2">
@@ -32,7 +30,7 @@ const Projects: React.FC = () => {
           <input
             type="text"
             name="name"
-            className="outline-none border-[1px] border-gray-300 rounded-lg p-2"
+            className="outline-none border-[1px] border-gray-300 rounded-lg p-2 focus:border-blue-600 focus:shadow-[0px_0px_0px_3px] focus:shadow-blue-300"
             ref={nameRef}
             required
             maxLength={12}
@@ -59,16 +57,25 @@ const Projects: React.FC = () => {
               return (
                 <div className="flex gap-2">
                   <NavLink
-                    to={`projects/${p.id}`}
                     key={p.id}
+                    to={`projects/${p.id}`}
                     className={({ isActive, isPending }) =>
-                      `${
-                        isActive
-                          ? `!border-blue-700 bg-blue-700 text-white`
-                          : isPending
-                          ? `bg-gray-50`
-                          : ``
-                      } border-2 border-gray-100 rounded-md px-4 py-2 flex items-center grow`
+                      clsx(
+                        'border-2',
+                        'border-gray-100',
+                        'rounded-md',
+                        'px-4',
+                        'py-2',
+                        'flex',
+                        'items-center',
+                        'grow',
+                        {
+                          'border-blue-700': isActive,
+                          'bg-blue-700': isActive,
+                          'text-white': isActive,
+                          'bg-gray-50': isPending,
+                        }
+                      )
                     }
                   >
                     <span className="grow overflow-hidden text-ellipsis whitespace-nowrap">
@@ -82,50 +89,35 @@ const Projects: React.FC = () => {
         </div>
       </div>
       <div>
-        <Dialog.Root open={isAddingProject} onOpenChange={(open) => setIsAddingProject(open)}>
-          <Dialog.Trigger asChild>
-            <button
-              onClick={() => setIsAddingProject(true)}
-              className="flex border-2 border-dashed border-indigo-500 text-indigo-500 px-6 py-3 rounded-lg w-full justify-center hover:bg-indigo-50"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-6 h-6"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m6-6H6" />
-              </svg>
-              <span>New Project</span>
-            </button>
-          </Dialog.Trigger>
-          <Dialog.Portal>
-            <Dialog.Overlay className="bg-opacity-30 bg-black data-[state=open]:animate-overlayShow fixed inset-0" />
-            <Dialog.Content className="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none">
-              <Dialog.Title className="font-medium text-lg">New Project</Dialog.Title>
-              <Dialog.Description className="mb-5 text-sm text-gray-700">
-                Create a new project.
-              </Dialog.Description>
-              {renderNewProjectForm()}
-              <Dialog.Close>
-                <button className="absolute top-[10px] right-[10px] inline-flex h-[25px] w-[25px] appearance-none items-center justify-center rounded-full focus:shadow-[0_0_0_2px] focus:outline-none">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="w-6 h-6"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </Dialog.Close>
-            </Dialog.Content>
-          </Dialog.Portal>
-        </Dialog.Root>
+        <Dialog
+          description="Create a new project."
+          onOpenChange={setIsAddingProject}
+          open={isAddingProject}
+          title="New Project"
+          trigger={{
+            className: clsx(
+              'border-2',
+              'border-dashed',
+              'border-indigo-500',
+              'text-indigo-500',
+              'hover:bg-indigo-100',
+              'focus:shadow-[0px_0px_0px_2px]',
+              'focus:shadow-indigo-300',
+              'focus:border-solid',
+              'flex',
+              'px-6',
+              'py-3',
+              'rounded-lg',
+              'w-full',
+              'justify-center',
+              'outline-none'
+            ),
+            label: 'New Project',
+            icon: <PlusSmal />
+          }}
+        >
+          {renderNewProjectForm()}
+        </Dialog>
       </div>
     </div>
   );

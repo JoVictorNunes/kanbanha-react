@@ -3,6 +3,7 @@ import Select, { MultiValue } from 'react-select';
 import Dialog from '@/components/dialog/component';
 import { useMembers, useSocket, useTeams } from '@/hooks';
 import type { TaskStatuses, UUID } from '@/contexts/socket/context';
+import PlusSmal from '@/svgs/PlusSmal';
 
 type SelectValue = MultiValue<{ value: string; label: string }> | null;
 
@@ -18,11 +19,11 @@ const Add: React.FC<Props> = (props) => {
   const { socket, connected } = useSocket();
   const teams = useTeams();
   const members = useMembers();
-  const team = useMemo(() => teams.find((t) => t.id === teamId), [teams, teamId]);
-  const teamMembers = useMemo(
-    () => members.filter((m) => team?.members?.includes?.(m.id)),
-    [members, team]
-  );
+  const team = useMemo(() => teams.find((team) => team.id === teamId), [teams, teamId]);
+  const teamMembers = useMemo(() => {
+    if (!team) return [];
+    return members.filter((m) => team.members.includes(m.id));
+  }, [members, team]);
 
   // State
   const [open, setOpen] = useState(false);
@@ -59,36 +60,52 @@ const Add: React.FC<Props> = (props) => {
 
     return (
       <form onSubmit={onSubmit} className="flex flex-col gap-2">
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-2">
           <div>
+            <label htmlFor="date">Date</label>
             <input
               type="date"
               name="date"
               id="date"
               value={date}
               onChange={(e) => {
-                console.log(e.target.value);
                 setDate(e.target.value);
               }}
+              className="block outline-none border-[1px] border-gray-300 rounded-lg p-2 focus:border-blue-600 focus:shadow-[0px_0px_0px_3px] focus:shadow-blue-300"
             />
           </div>
           <div>
-            <textarea name="description" id="description" cols={30} rows={10}></textarea>
+            <label htmlFor="description">Description</label>
+            <textarea
+              name="description"
+              id="description"
+              cols={30}
+              rows={10}
+              className="w-full resize-none outline-none border-[1px] border-gray-300 rounded-lg p-2 focus:border-blue-600 focus:shadow-[0px_0px_0px_3px] focus:shadow-blue-300"
+            />
           </div>
           <div>
-            <input type="date" name="dueDate" id="dueDate" />
+            <label htmlFor="dueDate">Due date</label>
+            <input
+              type="date"
+              name="dueDate"
+              id="dueDate"
+              className="block outline-none border-[1px] border-gray-300 rounded-lg p-2 focus:border-blue-600 focus:shadow-[0px_0px_0px_3px] focus:shadow-blue-300"
+            />
           </div>
-          <label htmlFor="memebers">Members</label>
-          <Select
-            options={options}
-            onChange={(value) => setSelectedMembers(value)}
-            name="members"
-            isMulti
-          />
+          <div>
+            <label htmlFor="assignees">Assignees</label>
+            <Select
+              options={options}
+              onChange={(value) => setSelectedMembers(value)}
+              name="assignees"
+              isMulti
+            />
+          </div>
         </div>
         <button
           type="submit"
-          className="self-end text-green-800 bg-green-100 hover:bg-green-200 py-1 px-6 rounded font-medium"
+          className="self-end text-blue-800 bg-blue-100 hover:bg-blue-200 py-1 px-6 rounded font-medium"
         >
           Add
         </button>
@@ -102,20 +119,12 @@ const Add: React.FC<Props> = (props) => {
       onOpenChange={setOpen}
       title="Add New Task"
       description="Add a new to do task."
-      triggerText="Add New Task"
-      triggerClassName="bg-white border-[1px] border-gray-200 text-blue-700 py-2 px-6 rounded w-full flex"
-      icon={
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className="w-6 h-6"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m6-6H6" />
-        </svg>
-      }
+      trigger={{
+        label: 'Add New Task',
+        className:
+          'bg-white border-[1px] border-gray-200 text-blue-700 py-2 px-6 rounded w-full flex',
+        icon: <PlusSmal />,
+      }}
     >
       {renderForm()}
     </Dialog>

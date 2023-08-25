@@ -2,6 +2,7 @@ import React, { SyntheticEvent, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Select, { MultiValue } from 'react-select';
 import * as Tabs from '@radix-ui/react-tabs';
+import clsx from 'clsx';
 import Dialog from '@/components/dialog/component';
 import MemberCard from '@/components/members/card/component';
 import {
@@ -75,7 +76,7 @@ const Project: React.FC = () => {
           <input
             type="text"
             name="name"
-            className="outline-none border-[1px] border-gray-300 rounded p-2 focus:shadow-[0px_0px_0px_1px] focus:shadow-blue-600 focus:border-blue-600"
+            className="outline-none border-[1px] border-gray-300 rounded p-2 focus:shadow-[0px_0px_0px_3px] focus:shadow-blue-300 focus:border-blue-600"
             ref={nameRef}
           />
         </div>
@@ -86,6 +87,7 @@ const Project: React.FC = () => {
             isMulti
             onChange={(value) => setSelectedMembers(value)}
             name="members"
+            tabIndex={0}
           />
         </div>
         <button
@@ -129,8 +131,10 @@ const Project: React.FC = () => {
             onOpenChange={setIsNewTeamDialogOpen}
             description={`Create a new team for the ${project.name} project.`}
             title="New Team"
-            triggerText="New Team"
-            triggerClassName="bg-blue-600 text-white rounded px-4 py-2"
+            trigger={{
+              label: 'New Team',
+              className: clsx('bg-blue-600', 'text-white', 'rounded', 'px-4', 'py-2'),
+            }}
           >
             {renderCreateTeamForm()}
           </Dialog>

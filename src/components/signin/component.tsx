@@ -43,9 +43,8 @@ const SignIn: React.FC = () => {
           <Form className="flex flex-col gap-4">
             <div className="flex flex-col">
               <label htmlFor="email">Email</label>
-              <Field
-                name="email"
-                render={({ field, form }: FieldProps) => (
+              <Field name="email">
+                {({ field, form }: FieldProps) => (
                   <input
                     {...field}
                     disabled={form.isSubmitting}
@@ -53,7 +52,7 @@ const SignIn: React.FC = () => {
                     className="disabled:opacity-50 border-[1px] border-black rounded-3xl outline-none focus:shadow-[0px_0px_0px_2px] py-2 px-4 focus:shadow-blue-600 focus:border-blue-600"
                   />
                 )}
-              />
+              </Field>
               <div className="text-red-600 text-sm h-5">
                 <ErrorMessage name="email" />
               </div>
@@ -61,9 +60,8 @@ const SignIn: React.FC = () => {
 
             <div className="flex flex-col">
               <label htmlFor="password">Password</label>
-              <Field
-                name="password"
-                render={({ field, form }: FieldProps) => (
+              <Field name="password">
+                {({ field, form }: FieldProps) => (
                   <input
                     {...field}
                     disabled={form.isSubmitting}
@@ -71,7 +69,7 @@ const SignIn: React.FC = () => {
                     className="disabled:opacity-50 border-[1px] border-black rounded-3xl outline-none focus:shadow-[0px_0px_0px_2px] py-2 px-4 focus:shadow-blue-600 focus:border-blue-600"
                   />
                 )}
-              />
+              </Field>
               <div className="text-red-600 text-sm h-5">
                 <ErrorMessage name="password" />
               </div>

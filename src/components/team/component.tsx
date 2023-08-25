@@ -6,6 +6,7 @@ import Dialog from '@/components/dialog/component';
 import Tasks from '@/components/tasks/component';
 import MemberCard from '@/components/members/card/component';
 import { useLayout, useMembers, useProjects, useSocket, useTasks, useTeams } from '@/hooks';
+import clsx from 'clsx';
 
 type SelectValue = MultiValue<{ value: string; label: string }>;
 
@@ -115,8 +116,10 @@ const Team: React.FC = () => {
             onOpenChange={setIsAddMemberDialogOpen}
             title="Add New Member"
             description="Select the new member to add in the team."
-            triggerText="Add Member"
-            triggerClassName="bg-blue-600 text-white rounded px-4 py-2"
+            trigger={{
+              label: 'Add Member',
+              className: clsx('bg-blue-600', 'text-white', 'rounded', 'px-4', 'py-2'),
+            }}
           >
             {renderAddMembersForm()}
           </Dialog>

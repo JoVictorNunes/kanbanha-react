@@ -2,13 +2,15 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { clsx } from 'clsx';
 import { useLayout } from '@/hooks';
+import { ACTIONS } from '@/contexts/layout/enums';
+import RectangleStack from '@/svgs/RectangleStack';
 
 const Navbar: React.FC = () => {
   const { layout, dispatch } = useLayout();
 
   const toggleProjectsPanel = () => {
     dispatch({
-      type: 'SET_PANEL_IS_OPEN',
+      type: ACTIONS.SET_PANEL_IS_OPEN,
       value: !layout.input.isPanelOpen,
     });
   };
@@ -34,26 +36,13 @@ const Navbar: React.FC = () => {
           to="/"
           className={`text-center m-2 rounded-xl bg-blue-700 text-white font-extrabold text-xl p-2 active:scale-[0.95] transition-all`}
         >
-          K
+          ƙ
         </Link>
         <button
-          className={`px-6 py-3 text-inherit outline-none border-l-4 border-transparent ${projectsPanelButtonStyles}`}
+          className={`px-6 py-3 outline-none border-l-4 border-transparent hover:bg-blue-100 ${projectsPanelButtonStyles}`}
           onClick={toggleProjectsPanel}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-6 h-6"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M6 6.878V6a2.25 2.25 0 012.25-2.25h7.5A2.25 2.25 0 0118 6v.878m-12 0c.235-.083.487-.128.75-.128h10.5c.263 0 .515.045.75.128m-12 0A2.25 2.25 0 004.5 9v.878m13.5-3A2.25 2.25 0 0119.5 9v.878m0 0a2.246 2.246 0 00-.75-.128H5.25c-.263 0-.515.045-.75.128m15 0A2.25 2.25 0 0121 12v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6c0-.98.626-1.813 1.5-2.122"
-            />
-          </svg>
+          <RectangleStack />
         </button>
       </div>
     </div>
