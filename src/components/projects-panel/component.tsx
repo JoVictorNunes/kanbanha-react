@@ -2,26 +2,40 @@ import React, { SyntheticEvent, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { NavLink } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { useProjects, useSocket } from '@/hooks';
+import { useAuth, useProjects, useSocket } from '@/hooks';
 import Dialog from '@/components/dialog/component';
 import PlusSmal from '@/svgs/PlusSmal';
+import Creatable from 'react-select/creatable';
+import { MultiValue } from 'react-select';
+import * as Yup from 'yup';
 
 const Projects: React.FC = () => {
   const projects = useProjects();
   const { socket, connected } = useSocket();
+  const { currentMember } = useAuth();
   const nameRef = useRef<HTMLInputElement>(null);
   const [isAddingProject, setIsAddingProject] = useState(false);
+  const [invited, setInvited] = useState<
+    MultiValue<{ readonly label: string; readonly value: string }>
+  >([]);
 
   const renderNewProjectForm = () => {
     const onSubmit = (e: SyntheticEvent) => {
       e.preventDefault();
       if (!connected || !nameRef.current) return;
-      socket.emit('projects:create', { name: nameRef.current.value }, (response) => {
-        if (response.code === 201) {
-          setIsAddingProject(false);
-          toast.success('Project created!');
+      socket.emit(
+        'projects:create',
+        { name: nameRef.current.value, invited: invited.map((v) => v.value) },
+        (response) => {
+          console.log(response);
+          if (response.code === 201) {
+            toast.success('Project created!');
+            setIsAddingProject(false);
+          } else {
+            toast.error(response.message);
+          }
         }
-      });
+      );
     };
     return (
       <form onSubmit={onSubmit} className="flex flex-col gap-2">
@@ -35,6 +49,37 @@ const Projects: React.FC = () => {
             required
             maxLength={12}
             minLength={3}
+          />
+        </div>
+        <div className="flex flex-col">
+          <label htmlFor="name">Invite members by email</label>
+          <Creatable
+            isClearable
+            isMulti
+            onChange={(value) => {
+              setInvited(value);
+            }}
+            onCreateOption={(value) => {
+              try {
+                const schema = Yup.string().email().required();
+                schema.validateSync(value);
+                setInvited((prev) => [
+                  ...prev,
+                  {
+                    label: value,
+                    value,
+                  },
+                ]);
+              } catch {
+                toast.error('Provide a valid email', {
+                  hideProgressBar: true,
+                  autoClose: 3000,
+                });
+              }
+            }}
+            value={invited}
+            formatCreateLabel={(value) => `Invite "${value}"`}
+            noOptionsMessage={() => 'Provide an email'}
           />
         </div>
         <button
@@ -53,38 +98,42 @@ const Projects: React.FC = () => {
         <div>
           <h2 className={`text-xl pb-2`}>Projects</h2>
           <div className={`flex flex-col gap-2`}>
-            {projects.map((p) => {
-              return (
-                <div className="flex gap-2">
-                  <NavLink
-                    key={p.id}
-                    to={`projects/${p.id}`}
-                    className={({ isActive, isPending }) =>
-                      clsx(
-                        'border-2',
-                        'border-gray-100',
-                        'rounded-md',
-                        'px-4',
-                        'py-2',
-                        'flex',
-                        'items-center',
-                        'grow',
-                        {
-                          'border-blue-700': isActive,
-                          'bg-blue-700': isActive,
-                          'text-white': isActive,
-                          'bg-gray-50': isPending,
-                        }
-                      )
-                    }
-                  >
-                    <span className="grow overflow-hidden text-ellipsis whitespace-nowrap">
-                      {p.name}
-                    </span>
-                  </NavLink>
-                </div>
-              );
-            })}
+            {currentMember === null
+              ? null
+              : projects
+                  .filter((p) => p.members.includes(currentMember.id))
+                  .map((p) => {
+                    return (
+                      <div className="flex gap-2">
+                        <NavLink
+                          key={p.id}
+                          to={`projects/${p.id}`}
+                          className={({ isActive, isPending }) =>
+                            clsx(
+                              'border-2',
+                              'border-gray-100',
+                              'rounded-md',
+                              'px-4',
+                              'py-2',
+                              'flex',
+                              'items-center',
+                              'grow',
+                              {
+                                'border-blue-700': isActive,
+                                'bg-blue-700': isActive,
+                                'text-white': isActive,
+                                'bg-gray-50': isPending,
+                              }
+                            )
+                          }
+                        >
+                          <span className="grow overflow-hidden text-ellipsis whitespace-nowrap">
+                            {p.name}
+                          </span>
+                        </NavLink>
+                      </div>
+                    );
+                  })}
           </div>
         </div>
       </div>
@@ -113,7 +162,7 @@ const Projects: React.FC = () => {
               'outline-none'
             ),
             label: 'New Project',
-            icon: <PlusSmal />
+            icon: <PlusSmal />,
           }}
         >
           {renderNewProjectForm()}

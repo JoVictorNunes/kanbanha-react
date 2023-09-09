@@ -6,7 +6,6 @@ import clsx from 'clsx';
 import Dialog from '@/components/dialog/component';
 import MemberCard from '@/components/members/card/component';
 import {
-  useAuth,
   useLayout,
   useMembers,
   useProjects,
@@ -21,7 +20,6 @@ const Project: React.FC = () => {
   const { projectId } = useParams();
 
   // Data
-  const { currentMember } = useAuth();
   const { socket, connected } = useSocket();
   const { layout } = useLayout();
   const projects = useProjects();
@@ -44,7 +42,19 @@ const Project: React.FC = () => {
   const finishedTasksPercentage = (finishedTasks.length / (tasksInTheProject.length || 1)) * 100;
 
   if (!project || !projectId) {
-    return <div className="font-light">This project does not exist or was deleted.</div>;
+    return (
+      <div
+        className={`p-5 absolute flex justify-center items-center`}
+        style={{
+          width: layout.main.width,
+          height: layout.main.height,
+          left: layout.main.left,
+          top: layout.main.top,
+        }}
+      >
+        <span>This project does not exist or was deleted.</span>
+      </div>
+    );
   }
 
   const renderCreateTeamForm = () => {
@@ -63,7 +73,7 @@ const Project: React.FC = () => {
     };
 
     const options = members
-      .filter((m) => m.id !== currentMember?.id)
+      .filter((m) => project.members.includes(m.id) && m.id !== project.ownerId)
       .map((member) => ({
         value: member.id,
         label: member.name,

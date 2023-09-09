@@ -8,6 +8,7 @@ export type Project = {
   id: string;
   name: string;
   ownerId: string;
+  members: Array<UUID>;
 };
 
 export type TaskStatuses = 'active' | 'ongoing' | 'review' | 'finished';
@@ -42,10 +43,18 @@ export type Member = {
   online: boolean;
 };
 
+export type Invite = {
+  id: UUID;
+  projectId: UUID;
+  memberId: UUID;
+  when: string;
+  accepted: boolean;
+};
+
 type ResponseCallback = (response: { code: number; message: string }) => void;
 type ReadCallback<T> = (data: T) => void;
 
-type ProjectsCreateData = { name: string };
+type ProjectsCreateData = { name: string; invited: Array<string> };
 type ProjectsUpdateData = { id: UUID; name: string };
 type ProjectsDeleteData = UUID;
 
@@ -89,6 +98,11 @@ type MemberUpdateData = {
   role: string;
 };
 
+export type InviteCreateData = {
+  projectId: UUID;
+  invited: Array<string>;
+};
+
 export interface ServerToClientsEvents {
   'projects:create': (project: Project) => void;
   'projects:update': (project: Project) => void;
@@ -107,6 +121,8 @@ export interface ServerToClientsEvents {
   'members:delete': (memberId: UUID) => void;
   'members:member_connected': (memberId: UUID) => void;
   'members:member_disconnected': (memberId: UUID) => void;
+
+  "invites:create": (invite: Invite) => void;
 }
 
 export interface ClientToServerEvents {
@@ -132,6 +148,10 @@ export interface ClientToServerEvents {
   'members:read': (callback: ReadCallback<Array<Member>>) => void;
   'members:update': (data: MemberUpdateData, callback: ResponseCallback) => void;
   'members:delete': (callback: ResponseCallback) => void;
+
+  "invites:create": (data: InviteCreateData, callback: ResponseCallback) => void;
+  "invites:read": (callback: ReadCallback<Array<Invite>>) => void;
+  "invites:accept": (inviteId: UUID, callback: ResponseCallback) => void;
 }
 
 export type SocketType = Socket<ServerToClientsEvents, ClientToServerEvents>;

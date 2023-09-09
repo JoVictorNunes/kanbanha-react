@@ -9,6 +9,7 @@ import ProjectsProvider from '@/contexts/projects/provider.tsx';
 import TeamsProvider from '@/contexts/teams/provider.tsx';
 import MembersProvider from '@/contexts/members/provider.tsx';
 import TasksProvider from '@/contexts/tasks/provider.tsx';
+import InvitesProvider from './contexts/invites/provider';
 import LayoutProvider from '@/contexts/layout/provider.tsx';
 import SignIn from '@/components/signin/component.tsx';
 import Home from '@/components/home/component.tsx';
@@ -32,9 +33,11 @@ const router = createBrowserRouter([
             <TeamsProvider>
               <MembersProvider>
                 <TasksProvider>
-                  <LayoutProvider>
-                    <App />
-                  </LayoutProvider>
+                  <InvitesProvider>
+                    <LayoutProvider>
+                      <App />
+                    </LayoutProvider>
+                  </InvitesProvider>
                   <ToastContainer />
                 </TasksProvider>
               </MembersProvider>

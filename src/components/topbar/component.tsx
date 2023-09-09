@@ -1,12 +1,17 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth, useLayout } from '@/hooks';
+import { useAuth, useInvites, useLayout, useMembers, useProjects, useSocket } from '@/hooks';
 import Dropdown from '@/components/dropdown/component';
+import * as Popover from '@radix-ui/react-popover';
 
 const Topbar: React.FC = () => {
   const { currentMember } = useAuth();
   const navigate = useNavigate();
   const { layout } = useLayout();
+  const invites = useInvites();
+  const projects = useProjects();
+  const members = useMembers();
+  const { socket } = useSocket();
 
   const options = [
     {
@@ -34,6 +39,72 @@ const Topbar: React.FC = () => {
         top: layout.topbar.top,
       }}
     >
+      <Popover.Root>
+        <Popover.Trigger asChild>
+          <button
+            className="rounded-full w-[35px] h-[35px] inline-flex items-center justify-center text-violet11 bg-white shadow-[0_2px_10px] shadow-blackA7 hover:bg-violet3 focus:shadow-[0_0_0_2px] focus:shadow-black cursor-default outline-none"
+            aria-label="Update dimensions"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-6 h-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"
+              />
+            </svg>
+          </button>
+        </Popover.Trigger>
+        <Popover.Portal>
+          <Popover.Content
+            className="rounded p-5 w-[260px] bg-white shadow-[0_10px_38px_-10px_hsla(206,22%,7%,.35),0_10px_20px_-15px_hsla(206,22%,7%,.2)] focus:shadow-[0_10px_38px_-10px_hsla(206,22%,7%,.35),0_10px_20px_-15px_hsla(206,22%,7%,.2),0_0_0_2px_theme(colors.violet7)] will-change-[transform,opacity] data-[state=open]:data-[side=top]:animate-slideDownAndFade data-[state=open]:data-[side=right]:animate-slideLeftAndFade data-[state=open]:data-[side=bottom]:animate-slideUpAndFade data-[state=open]:data-[side=left]:animate-slideRightAndFade"
+            sideOffset={5}
+          >
+            <div className="flex flex-col gap-2.5">
+              {invites.map((invite) => {
+                const project = projects.find((p) => p.id === invite.projectId);
+                const owner = members.find((m) => m.id === project?.ownerId);
+                return (
+                  <div key={invite.id}>
+                    <span>{`${owner?.name} invited you to engage in the ${project?.name} project`}</span>
+                    <button
+                      onClick={() => {
+                        socket.emit('invites:accept', invite.id, (res) => {
+                          console.log(res);
+                        });
+                      }}
+                    >
+                      Accept
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+            <Popover.Close
+              className="rounded-full h-[25px] w-[25px] inline-flex items-center justify-center text-violet11 absolute top-[5px] right-[5px] hover:bg-violet4 focus:shadow-[0_0_0_2px] focus:shadow-violet7 outline-none cursor-default"
+              aria-label="Close"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-6 h-6"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </Popover.Close>
+            <Popover.Arrow className="fill-white" />
+          </Popover.Content>
+        </Popover.Portal>
+      </Popover.Root>
       <button>
         <svg
           xmlns="http://www.w3.org/2000/svg"
