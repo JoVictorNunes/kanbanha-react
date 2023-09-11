@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Invite } from '@/contexts/socket/context';
 
-const InviteContext = React.createContext<Array<Invite>>([]);
+const InvitesContext = React.createContext<Record<string, Invite>>({});
 
-export default InviteContext;
+export default InvitesContext;

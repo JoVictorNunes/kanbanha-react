@@ -1,18 +1,12 @@
-import React, { SyntheticEvent, useRef, useState } from 'react';
+import React, { SyntheticEvent, useMemo, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Select, { MultiValue } from 'react-select';
 import * as Tabs from '@radix-ui/react-tabs';
 import clsx from 'clsx';
 import Dialog from '@/components/dialog/component';
 import MemberCard from '@/components/members/card/component';
-import {
-  useLayout,
-  useMembers,
-  useProjects,
-  useSocket,
-  useTasks,
-  useTeams,
-} from '@/hooks';
+import { useLayout, useMembers, useProjects, useSocket, useTasks, useTeams } from '@/hooks';
+import { CLIENT_TO_SERVER_EVENTS } from '@/contexts/socket/enums';
 
 type SelectValue = MultiValue<{ value: string; label: string }>;
 
@@ -33,18 +27,40 @@ const Project: React.FC = () => {
   const [editing, setEditing] = useState(false);
   const nameRef = useRef<HTMLInputElement | null>(null);
 
-  const project = projects.find((project) => project.id === projectId);
-  const teamsInTheProject = teams.filter((task) => task.projectId === projectId);
-  const tasksInTheProject = tasks.filter((task) =>
-    teamsInTheProject.some((team) => team.id === task.teamId)
+  const project = projects[projectId ?? ''];
+  const teamsInTheProject = useMemo(
+    () => Object.values(teams).filter((task) => task.projectId === projectId),
+    [projectId, teams]
   );
-  const finishedTasks = tasksInTheProject.filter((task) => task.status === 'finished');
-  const finishedTasksPercentage = (finishedTasks.length / (tasksInTheProject.length || 1)) * 100;
+  const tasksInTheProject = useMemo(
+    () =>
+      Object.values(tasks).filter((task) =>
+        teamsInTheProject.some((team) => team.id === task.teamId)
+      ),
+    [tasks, teamsInTheProject]
+  );
+  const finishedTasks = useMemo(
+    () => tasksInTheProject.filter((task) => task.status === 'finished'),
+    [tasksInTheProject]
+  );
+  const finishedTasksPercentage = useMemo(
+    () => (finishedTasks.length / (tasksInTheProject.length || 1)) * 100,
+    [finishedTasks.length, tasksInTheProject.length]
+  );
+  const memberOptions = useMemo(() => {
+    if (!project) return [];
+    return Object.values(members)
+      .filter((member) => project.members.includes(member.id) && member.id !== project.ownerId)
+      .map((member) => ({
+        value: member.id,
+        label: member.name,
+      }));
+  }, [members, project]);
 
-  if (!project || !projectId) {
+  if (!project) {
     return (
       <div
-        className={`p-5 absolute flex justify-center items-center`}
+        className="p-5 absolute flex justify-center items-center"
         style={{
           width: layout.main.width,
           height: layout.main.height,
@@ -62,22 +78,15 @@ const Project: React.FC = () => {
       e.preventDefault();
       if (!nameRef.current || !connected) return;
       socket.emit(
-        'teams:create',
+        CLIENT_TO_SERVER_EVENTS.TEAMS.CREATE,
         {
-          projectId,
+          projectId: project.id,
           name: nameRef.current.value,
-          members: selectedMembers.map((m) => m.value),
+          members: selectedMembers.map((option) => option.value),
         },
         (response) => console.log(response)
       );
     };
-
-    const options = members
-      .filter((m) => project.members.includes(m.id) && m.id !== project.ownerId)
-      .map((member) => ({
-        value: member.id,
-        label: member.name,
-      }));
 
     return (
       <form onSubmit={onSubmit} className="flex flex-col gap-2">
@@ -91,9 +100,9 @@ const Project: React.FC = () => {
           />
         </div>
         <div className="flex flex-col">
-          <label htmlFor="memebers">Members</label>
+          <label htmlFor="members">Members</label>
           <Select
-            options={options}
+            options={memberOptions}
             isMulti
             onChange={(value) => setSelectedMembers(value)}
             name="members"
@@ -190,7 +199,7 @@ const Project: React.FC = () => {
                 <button
                   onClick={() => {
                     if (!connected) return;
-                    socket.emit('projects:delete', projectId, (response) => console.log(response));
+                    socket.emit('projects:delete', project.id, (response) => console.log(response));
                   }}
                   className="border-[1px] border-red-600 bg-red-600 text-white rounded py-1 px-4 hover:bg-red-700"
                 >
@@ -201,7 +210,7 @@ const Project: React.FC = () => {
                     setEditing(false);
                     const name = document.getElementById('projectName')?.innerText;
                     if (!name || !connected) return;
-                    socket.emit('projects:update', { id: projectId, name }, (response) =>
+                    socket.emit('projects:update', { id: project.id, name }, (response) =>
                       console.log(response)
                     );
                   }}

@@ -27,8 +27,7 @@ const Projects: React.FC = () => {
         'projects:create',
         { name: nameRef.current.value, invited: invited.map((v) => v.value) },
         (response) => {
-          console.log(response);
-          if (response.code === 201) {
+          if (response.code === 200) {
             toast.success('Project created!');
             setIsAddingProject(false);
           } else {
@@ -100,7 +99,7 @@ const Projects: React.FC = () => {
           <div className={`flex flex-col gap-2`}>
             {currentMember === null
               ? null
-              : projects
+              : Object.values(projects)
                   .filter((p) => p.members.includes(currentMember.id))
                   .map((p) => {
                     return (

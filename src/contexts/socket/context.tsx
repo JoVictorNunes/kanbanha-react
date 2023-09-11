@@ -47,6 +47,7 @@ export type Invite = {
   id: UUID;
   projectId: UUID;
   memberId: UUID;
+  text: string;
   when: string;
   accepted: boolean;
 };
@@ -122,7 +123,8 @@ export interface ServerToClientsEvents {
   'members:member_connected': (memberId: UUID) => void;
   'members:member_disconnected': (memberId: UUID) => void;
 
-  "invites:create": (invite: Invite) => void;
+  'invites:create': (invite: Invite) => void;
+  'invites:update': (invite: Invite) => void;
 }
 
 export interface ClientToServerEvents {
@@ -149,9 +151,9 @@ export interface ClientToServerEvents {
   'members:update': (data: MemberUpdateData, callback: ResponseCallback) => void;
   'members:delete': (callback: ResponseCallback) => void;
 
-  "invites:create": (data: InviteCreateData, callback: ResponseCallback) => void;
-  "invites:read": (callback: ReadCallback<Array<Invite>>) => void;
-  "invites:accept": (inviteId: UUID, callback: ResponseCallback) => void;
+  'invites:create': (data: InviteCreateData, callback: ResponseCallback) => void;
+  'invites:read': (callback: ReadCallback<Array<Invite>>) => void;
+  'invites:accept': (inviteId: UUID, callback: ResponseCallback) => void;
 }
 
 export type SocketType = Socket<ServerToClientsEvents, ClientToServerEvents>;

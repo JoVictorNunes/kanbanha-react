@@ -25,22 +25,25 @@ const Team: React.FC = () => {
   const [selectedMembers, setSelectedMembers] = useState<SelectValue>([]);
   const [isAddMemberDialogOpen, setIsAddMemberDialogOpen] = useState(false);
 
-  const project = useMemo(() => projects.find((p) => p.id === projectId), [projects, projectId]);
-  const team = useMemo(() => teams.find((t) => t.id === teamId), [teams, teamId]);
-  const teamTasks = useMemo(() => tasks.filter((t) => t.teamId === teamId), [tasks, teamId]);
+  const project = projects[projectId ?? ''];
+  const team = teams[teamId ?? ''];
+  const teamTasks = useMemo(
+    () => Object.values(tasks).filter((task) => task.teamId === teamId),
+    [tasks, teamId]
+  );
   const finishedTasks = useMemo(
-    () => teamTasks.filter((t) => t.status === 'finished'),
+    () => teamTasks.filter((task) => task.status === 'finished'),
     [teamTasks]
   );
   const finishedTasksPercentual = useMemo(
     () => (finishedTasks.length / (teamTasks.length || 1)) * 100,
-    [finishedTasks, teamTasks]
+    [finishedTasks.length, teamTasks.length]
   );
 
   if (!project || !team) return null;
 
   const renderAddMembersForm = () => {
-    const options = members
+    const options = Object.values(members)
       .filter((m) => !team.members.includes(m.id))
       .map((member) => ({
         value: member.id,
@@ -153,8 +156,8 @@ const Team: React.FC = () => {
         <Tabs.Content value="tab1">Overview</Tabs.Content>
         <Tabs.Content value="tab2" className="bg-gray-50">
           <div className="flex flex-col gap-4 p-4">
-            {team.members.map((m) => {
-              const member = members.find((n) => n.id === m);
+            {team.members.map((memberId) => {
+              const member = members[memberId];
               return <MemberCard memberId={member?.id as string} />;
             })}
           </div>

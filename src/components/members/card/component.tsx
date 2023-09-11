@@ -27,7 +27,7 @@ const roleStaticStatus = clsx('text-s', 'text-gray-600');
 const MemberCard: React.FC<Props> = (props) => {
   const { memberId } = props;
   const members = useMembers();
-  const member = members.find((m) => m.id === memberId);
+  const member = members[memberId];
 
   const statusStyles = clsx({
     'before:bg-green-500': member && member.online,

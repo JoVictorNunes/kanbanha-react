@@ -1,30 +1,29 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth, useInvites, useLayout, useMembers, useProjects, useSocket } from '@/hooks';
+import { useAuth, useInvites, useLayout, useSocket } from '@/hooks';
 import Dropdown from '@/components/dropdown/component';
 import * as Popover from '@radix-ui/react-popover';
+import clsx from 'clsx';
 
 const Topbar: React.FC = () => {
   const { currentMember } = useAuth();
-  const navigate = useNavigate();
   const { layout } = useLayout();
-  const invites = useInvites();
-  const projects = useProjects();
-  const members = useMembers();
   const { socket } = useSocket();
+  const invites = useInvites();
+  const navigate = useNavigate();
 
   const options = [
     {
       label: 'My account',
       onSelect: () => {
-        console.log('My account selected');
         navigate('/account');
       },
     },
     {
       label: 'Sign out',
       onSelect: () => {
-        console.log('Sign out selected');
+        localStorage.removeItem('token');
+        navigate('/signin');
       },
     },
   ];
@@ -42,7 +41,7 @@ const Topbar: React.FC = () => {
       <Popover.Root>
         <Popover.Trigger asChild>
           <button
-            className="rounded-full w-[35px] h-[35px] inline-flex items-center justify-center text-violet11 bg-white shadow-[0_2px_10px] shadow-blackA7 hover:bg-violet3 focus:shadow-[0_0_0_2px] focus:shadow-black cursor-default outline-none"
+            className="rounded-full w-[35px] h-[35px] inline-flex items-center justify-center bg-white cursor-pointer outline-none"
             aria-label="Update dimensions"
           >
             <svg
@@ -51,7 +50,7 @@ const Topbar: React.FC = () => {
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
-              className="w-6 h-6"
+              className="w-5 h-5"
             >
               <path
                 strokeLinecap="round"
@@ -63,44 +62,40 @@ const Topbar: React.FC = () => {
         </Popover.Trigger>
         <Popover.Portal>
           <Popover.Content
-            className="rounded p-5 w-[260px] bg-white shadow-[0_10px_38px_-10px_hsla(206,22%,7%,.35),0_10px_20px_-15px_hsla(206,22%,7%,.2)] focus:shadow-[0_10px_38px_-10px_hsla(206,22%,7%,.35),0_10px_20px_-15px_hsla(206,22%,7%,.2),0_0_0_2px_theme(colors.violet7)] will-change-[transform,opacity] data-[state=open]:data-[side=top]:animate-slideDownAndFade data-[state=open]:data-[side=right]:animate-slideLeftAndFade data-[state=open]:data-[side=bottom]:animate-slideUpAndFade data-[state=open]:data-[side=left]:animate-slideRightAndFade"
+            className="rounded w-[260px] p-1 bg-white border-[1px] border-gray-300 text-xs select-none"
             sideOffset={5}
           >
             <div className="flex flex-col gap-2.5">
-              {invites.map((invite) => {
-                const project = projects.find((p) => p.id === invite.projectId);
-                const owner = members.find((m) => m.id === project?.ownerId);
-                return (
-                  <div key={invite.id}>
-                    <span>{`${owner?.name} invited you to engage in the ${project?.name} project`}</span>
-                    <button
-                      onClick={() => {
-                        socket.emit('invites:accept', invite.id, (res) => {
-                          console.log(res);
-                        });
-                      }}
+              {Object.values(invites).length > 0 ? (
+                Object.values(invites).map((invite) => {
+                  return (
+                    <div
+                      key={invite.id}
+                      className={clsx(
+                        {
+                          'font-bold': !invite.accepted,
+                        },
+                        'hover:bg-gray-200 p-4 flex flex-col items-start rounded'
+                      )}
                     >
-                      Accept
-                    </button>
-                  </div>
-                );
-              })}
+                      <span>{invite.text}</span>
+                      <button
+                        onClick={() => {
+                          socket.emit('invites:accept', invite.id, (res) => {
+                            console.log(res);
+                          });
+                        }}
+                        className={`rounded bg-gray-300 px-2 py-1 hover:bg-blue-600 hover:text-white`}
+                      >
+                        Accept
+                      </button>
+                    </div>
+                  );
+                })
+              ) : (
+                <span>You have no invites!</span>
+              )}
             </div>
-            <Popover.Close
-              className="rounded-full h-[25px] w-[25px] inline-flex items-center justify-center text-violet11 absolute top-[5px] right-[5px] hover:bg-violet4 focus:shadow-[0_0_0_2px] focus:shadow-violet7 outline-none cursor-default"
-              aria-label="Close"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-6 h-6"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </Popover.Close>
             <Popover.Arrow className="fill-white" />
           </Popover.Content>
         </Popover.Portal>
