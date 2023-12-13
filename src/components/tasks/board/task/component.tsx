@@ -19,7 +19,7 @@ const Task: React.FC<Props> = (props) => {
   const assignees = useMemo(() => {
     const assignees: Member[] = [];
     task.assignees.forEach((assigneeId) => {
-      const assignee = members.find((member) => member.id === assigneeId);
+      const assignee = members[assigneeId];
       if (assignee) {
         assignees.push(assignee);
       }

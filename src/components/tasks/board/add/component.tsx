@@ -19,10 +19,10 @@ const Add: React.FC<Props> = (props) => {
   const { socket, connected } = useSocket();
   const teams = useTeams();
   const members = useMembers();
-  const team = useMemo(() => teams.find((team) => team.id === teamId), [teams, teamId]);
+  const team = useMemo(() => teams[teamId], [teams, teamId]);
   const teamMembers = useMemo(() => {
     if (!team) return [];
-    return members.filter((m) => team.members.includes(m.id));
+    return Object.values(members).filter((m) => team.members.includes(m.id));
   }, [members, team]);
 
   // State

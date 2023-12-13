@@ -38,7 +38,17 @@ const MemberCard: React.FC<Props> = (props) => {
     <div className="flex gap-2 items-center">
       <div className={`${nameStaticStyles}`}>{member ? member.name.substring(0, 2) : '??'}</div>
       <div>
-        <div>{member ? member.name : 'Unknown'}</div>
+        <div>
+          {member ? (
+            <span>
+              <span>{member.name}</span>
+              &nbsp;
+              <span className='text-sm text-gray-500'>({member.email})</span>
+            </span>
+          ) : (
+            <span>Unknown</span>
+          )}
+        </div>
         <div className={`${roleStaticStatus}`}>{member ? member.role : ''}</div>
         <div className={`${statusStyles} ${statusStaticStyles}`}>
           {member && member.online ? 'Online' : 'Offline'}

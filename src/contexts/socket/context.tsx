@@ -5,9 +5,9 @@ import instance from './instance';
 export type UUID = string;
 
 export type Project = {
-  id: string;
+  id: UUID;
   name: string;
-  ownerId: string;
+  ownerId: UUID;
   members: Array<UUID>;
 };
 
@@ -32,7 +32,7 @@ export type Team = {
   id: UUID;
   name: string;
   projectId: UUID;
-  members: Array<string>;
+  members: Array<UUID>;
 };
 
 export type Member = {
@@ -45,7 +45,7 @@ export type Member = {
 
 export type Invite = {
   id: UUID;
-  projectId: UUID;
+  projectId: UUID | null;
   memberId: UUID;
   text: string;
   when: string;
@@ -55,17 +55,17 @@ export type Invite = {
 type ResponseCallback = (response: { code: number; message: string }) => void;
 type ReadCallback<T> = (data: T) => void;
 
-type ProjectsCreateData = { name: string; invited: Array<string> };
-type ProjectsUpdateData = { id: UUID; name: string };
-type ProjectsDeleteData = UUID;
+type CreateProjectData = { name: string; invited: Array<string> };
+type UpdateProjectData = { id: UUID; name: string };
+type DeleteProjectData = { id: UUID };
 
-type TeamsCreateData = { projectId: UUID; name: string; members: Array<UUID> };
-type TeamsUpdateData = { teamId: UUID; name: string };
-type TeamsDeleteData = UUID;
-type TeamsAddMemberData = { teamId: UUID; memberId: UUID };
-type TeamsRemoveMemberData = TeamsAddMemberData;
+type CreateTeamData = { projectId: UUID; name: string; members: Array<UUID> };
+type UpdateTeamData = { teamId: UUID; name: string };
+type DeleteTeamData = { id: UUID };
+type AddTeamMemberData = { teamId: UUID; memberId: UUID };
+type RemoveTeamMemberData = AddTeamMemberData;
 
-type TasksCreateData = {
+type CreateTaskData = {
   date: number;
   description: string;
   dueDate: number;
@@ -73,35 +73,31 @@ type TasksCreateData = {
   teamId: UUID;
   status: TaskStatuses;
 };
-type TasksUpdateData = {
+type UpdateTaskData = {
   id: UUID;
   date: number;
   description: string;
   dueDate: number;
   assignees: UUID[];
 };
-type TasksDeleteData = UUID;
-type TasksMoveData = {
+type DeleteTaskData = { id: UUID };
+type MoveTaskData = {
   taskId: UUID;
   status: TaskStatuses;
   index: number;
 };
 
-type MemberCreateData = {
-  email: string;
-  password: string;
-  name: string;
-  role: string;
-};
-type MemberUpdateData = {
-  email: string;
+type UpdateMemberData = {
   name: string;
   role: string;
 };
 
-export type InviteCreateData = {
+export type CreateInviteData = {
   projectId: UUID;
   invited: Array<string>;
+};
+export type AccepteInviteData = {
+  id: UUID;
 };
 
 export interface ServerToClientsEvents {
@@ -128,32 +124,30 @@ export interface ServerToClientsEvents {
 }
 
 export interface ClientToServerEvents {
-  'projects:create': (data: ProjectsCreateData, callback: ResponseCallback) => void;
+  'projects:create': (data: CreateProjectData, callback: ResponseCallback) => void;
   'projects:read': (callback: ReadCallback<Array<Project>>) => void;
-  'projects:update': (data: ProjectsUpdateData, callback: ResponseCallback) => void;
-  'projects:delete': (projectId: ProjectsDeleteData, callback: ResponseCallback) => void;
+  'projects:update': (data: UpdateProjectData, callback: ResponseCallback) => void;
+  'projects:delete': (data: DeleteProjectData, callback: ResponseCallback) => void;
 
-  'teams:create': (data: TeamsCreateData, callback: ResponseCallback) => void;
+  'teams:create': (data: CreateTeamData, callback: ResponseCallback) => void;
   'teams:read': (callback: ReadCallback<Array<Team>>) => void;
-  'teams:update': (data: TeamsUpdateData, callback: ResponseCallback) => void;
-  'teams:delete': (teamId: TeamsDeleteData, callback: ResponseCallback) => void;
-  'teams:addMember': (data: TeamsAddMemberData, callback: ResponseCallback) => void;
-  'teams:removeMember': (data: TeamsRemoveMemberData, callback: ResponseCallback) => void;
+  'teams:update': (data: UpdateTeamData, callback: ResponseCallback) => void;
+  'teams:delete': (teamId: DeleteTeamData, callback: ResponseCallback) => void;
+  'teams:add_member': (data: AddTeamMemberData, callback: ResponseCallback) => void;
+  'teams:remove_member': (data: RemoveTeamMemberData, callback: ResponseCallback) => void;
 
-  'tasks:create': (data: TasksCreateData, callback: ResponseCallback) => void;
+  'tasks:create': (data: CreateTaskData, callback: ResponseCallback) => void;
   'tasks:read': (callback: ReadCallback<Array<Task>>) => void;
-  'tasks:update': (data: TasksUpdateData, callback: ResponseCallback) => void;
-  'tasks:delete': (taskId: TasksDeleteData, callback: ResponseCallback) => void;
-  'tasks:move': (data: TasksMoveData, callback: ResponseCallback) => void;
+  'tasks:update': (data: UpdateTaskData, callback: ResponseCallback) => void;
+  'tasks:delete': (data: DeleteTaskData, callback: ResponseCallback) => void;
+  'tasks:move': (data: MoveTaskData, callback: ResponseCallback) => void;
 
-  'members:create': (data: MemberCreateData, callback: ResponseCallback) => void;
   'members:read': (callback: ReadCallback<Array<Member>>) => void;
-  'members:update': (data: MemberUpdateData, callback: ResponseCallback) => void;
-  'members:delete': (callback: ResponseCallback) => void;
+  'members:update': (data: UpdateMemberData, callback: ResponseCallback) => void;
 
-  'invites:create': (data: InviteCreateData, callback: ResponseCallback) => void;
+  'invites:create': (data: CreateInviteData, callback: ResponseCallback) => void;
   'invites:read': (callback: ReadCallback<Array<Invite>>) => void;
-  'invites:accept': (inviteId: UUID, callback: ResponseCallback) => void;
+  'invites:accept': (data: AccepteInviteData, callback: ResponseCallback) => void;
 }
 
 export type SocketType = Socket<ServerToClientsEvents, ClientToServerEvents>;

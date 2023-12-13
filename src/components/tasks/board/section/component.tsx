@@ -19,8 +19,8 @@ const Section: React.FC<Props> = (props) => {
   const teams = useTeams();
   const tasks = useTasks();
 
-  const team = useMemo(() => teams.find((t) => t.id === teamId), [teams, teamId]);
-  const teamTasks = useMemo(() => tasks.filter((t) => t.teamId === teamId), [tasks, teamId]);
+  const team = useMemo(() => teams[teamId], [teams, teamId]);
+  const teamTasks = useMemo(() => Object.values(tasks).filter((t) => t.teamId === teamId), [tasks, teamId]);
   const tasksFiltered = useMemo(
     () => teamTasks.filter((t) => t.status === status).sort((a, b) => a.index - b.index),
     [teamTasks, status]

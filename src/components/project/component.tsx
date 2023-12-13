@@ -5,13 +5,21 @@ import * as Tabs from '@radix-ui/react-tabs';
 import clsx from 'clsx';
 import Dialog from '@/components/dialog/component';
 import MemberCard from '@/components/members/card/component';
-import { useLayout, useMembers, useProjects, useSocket, useTasks, useTeams } from '@/hooks';
+import {
+  useInvites,
+  useLayout,
+  useMembers,
+  useProjects,
+  useSocket,
+  useTasks,
+  useTeams,
+} from '@/hooks';
 import { CLIENT_TO_SERVER_EVENTS } from '@/contexts/socket/enums';
 
 type SelectValue = MultiValue<{ value: string; label: string }>;
 
 const Project: React.FC = () => {
-  const { projectId } = useParams();
+  const { projectId = '' } = useParams();
 
   // Data
   const { socket, connected } = useSocket();
@@ -20,6 +28,7 @@ const Project: React.FC = () => {
   const teams = useTeams();
   const members = useMembers();
   const tasks = useTasks();
+  const invites = useInvites();
 
   // State
   const [selectedMembers, setSelectedMembers] = useState<SelectValue>([]);
@@ -27,11 +36,19 @@ const Project: React.FC = () => {
   const [editing, setEditing] = useState(false);
   const nameRef = useRef<HTMLInputElement | null>(null);
 
-  const project = projects[projectId ?? ''];
+  const project = projects[projectId];
   const teamsInTheProject = useMemo(
-    () => Object.values(teams).filter((task) => task.projectId === projectId),
+    () => Object.values(teams).filter((team) => team.projectId === projectId),
     [projectId, teams]
   );
+  const membersInTheProject = useMemo(() => {
+    if (!project) return [];
+    return project.members.map((memberId) => members[memberId]);
+  }, [members, project]);
+  const projectInvites = useMemo(() => {
+    return Object.values(invites).filter((i) => i.projectId === projectId && !i.accepted);
+  }, [invites, projectId]);
+  const unenrolledMembers = projectInvites.map((i) => members[i.memberId]);
   const tasksInTheProject = useMemo(
     () =>
       Object.values(tasks).filter((task) =>
@@ -48,14 +65,11 @@ const Project: React.FC = () => {
     [finishedTasks.length, tasksInTheProject.length]
   );
   const memberOptions = useMemo(() => {
-    if (!project) return [];
-    return Object.values(members)
-      .filter((member) => project.members.includes(member.id) && member.id !== project.ownerId)
-      .map((member) => ({
-        value: member.id,
-        label: member.name,
-      }));
-  }, [members, project]);
+    return membersInTheProject.map((member) => ({
+      value: member.id,
+      label: member.name,
+    }));
+  }, [membersInTheProject]);
 
   if (!project) {
     return (
@@ -183,7 +197,24 @@ const Project: React.FC = () => {
           </div>
           <div>
             <div className="text-xs text-gray-500 font-bold">Owner</div>
-            <MemberCard memberId={project.ownerId as string} />
+            <MemberCard memberId={project.ownerId} />
+          </div>
+          <div>
+            <div className="text-xs text-gray-500 font-bold">Members</div>
+            <div>
+              {membersInTheProject.map((member) => (
+                <div className="flex items-center p-2 rounded odd:bg-gray-200">
+                  <div className='grow'><MemberCard memberId={member.id} /></div>
+                  <div>Enrolled</div>
+                </div>
+              ))}
+              {unenrolledMembers.map((member) => (
+                <div className="flex items-center p-2 rounded odd:bg-gray-200">
+                  <div className='grow'><MemberCard memberId={member.id} /></div>
+                  <div>Invited</div>
+                </div>
+              ))}
+            </div>
           </div>
           <div className="flex gap-2">
             {editing ? (
@@ -199,7 +230,9 @@ const Project: React.FC = () => {
                 <button
                   onClick={() => {
                     if (!connected) return;
-                    socket.emit('projects:delete', project.id, (response) => console.log(response));
+                    socket.emit('projects:delete', { id: project.id }, (response) =>
+                      console.log(response)
+                    );
                   }}
                   className="border-[1px] border-red-600 bg-red-600 text-white rounded py-1 px-4 hover:bg-red-700"
                 >

@@ -81,7 +81,7 @@ const Topbar: React.FC = () => {
                       <span>{invite.text}</span>
                       <button
                         onClick={() => {
-                          socket.emit('invites:accept', invite.id, (res) => {
+                          socket.emit('invites:accept', { id: invite.id }, (res) => {
                             console.log(res);
                           });
                         }}

@@ -78,6 +78,7 @@ const InvitesProvider: React.FC<Props> = (props) => {
   useEffect(() => {
     if (!connected || isInititalInvitesRead.current) return;
     socket.emit(CLIENT_TO_SERVER_EVENTS.INVITES.READ, (invites: Array<Invite>) => {
+      console.log(invites)
       invites.forEach((invite) => {
         dispatch({
           type: ACTIONS.CREATE,
