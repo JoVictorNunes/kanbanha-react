@@ -79,6 +79,64 @@ const Projects: React.FC = () => {
             value={invited}
             formatCreateLabel={(value) => `Invite "${value}"`}
             noOptionsMessage={() => 'Provide an email'}
+            placeholder="Email"
+            unstyled
+            styles={{
+              multiValueLabel: (base) => ({
+                ...base,
+                fontSize: '1em',
+                padding: '0.2rem 0.5rem',
+              }),
+              control: (base, state) => ({
+                ...base,
+                borderWidth: '1px',
+                borderColor: state.isFocused ? '#2563eb' : '#d1d5db',
+                borderRadius: '0.5rem',
+                padding: '0.5rem',
+                boxShadow: state.isFocused ? '0 0 0 3px #93c5fd' : undefined,
+              }),
+              multiValue: (base) => ({
+                ...base,
+                backgroundColor: '#dbeafe',
+                // padding: '0.2rem',
+                borderRadius: '0.5rem',
+                overflow: 'hidden',
+              }),
+              multiValueRemove: (base, props) => ({
+                ...base,
+                padding: '0 0.2rem',
+                ':hover': {
+                  backgroundColor: '#2563eb',
+                  color: 'white',
+                },
+              }),
+              menu(base, props) {
+                console.log(base);
+                return {
+                  ...base,
+                  border: '1px solid #d1d5db',
+                  backgroundColor: 'white',
+                  borderRadius: '0.5rem',
+                  padding: '0.5rem 0',
+                  top: '120%',
+                };
+              },
+              option(base, props) {
+                return {
+                  ...base,
+                  padding: '0.5rem',
+                  ':hover': {
+                    backgroundColor: '#dbeafe',
+                  },
+                };
+              },
+              valueContainer(base, props) {
+                return {
+                  ...base,
+                  gap: '0.5rem',
+                };
+              },
+            }}
           />
         </div>
         <button

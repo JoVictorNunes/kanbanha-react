@@ -43,7 +43,7 @@ const MemberCard: React.FC<Props> = (props) => {
             <span>
               <span>{member.name}</span>
               &nbsp;
-              <span className='text-sm text-gray-500'>({member.email})</span>
+              <span className='text-sm text-gray-500'>{member.email}</span>
             </span>
           ) : (
             <span>Unknown</span>

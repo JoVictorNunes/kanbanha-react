@@ -22,6 +22,7 @@ const Topbar: React.FC = () => {
     {
       label: 'Sign out',
       onSelect: () => {
+        socket.disconnect();
         localStorage.removeItem('token');
         navigate('/signin');
       },

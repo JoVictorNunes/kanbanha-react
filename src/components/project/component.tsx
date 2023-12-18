@@ -29,21 +29,23 @@ const Project: React.FC = () => {
   const members = useMembers();
   const tasks = useTasks();
   const invites = useInvites();
+  const project = projects[projectId];
 
   // State
   const [selectedMembers, setSelectedMembers] = useState<SelectValue>([]);
   const [isNewTeamDialogOpen, setIsNewTeamDialogOpen] = useState(false);
-  const [editing, setEditing] = useState(false);
   const nameRef = useRef<HTMLInputElement | null>(null);
+  const [projectName, setProjectName] = useState(project?.name || '');
 
-  const project = projects[projectId];
   const teamsInTheProject = useMemo(
     () => Object.values(teams).filter((team) => team.projectId === projectId),
     [projectId, teams]
   );
   const membersInTheProject = useMemo(() => {
     if (!project) return [];
-    return project.members.map((memberId) => members[memberId]);
+    return project.members
+      .filter((memberId) => memberId !== project.ownerId)
+      .map((memberId) => members[memberId]);
   }, [members, project]);
   const projectInvites = useMemo(() => {
     return Object.values(invites).filter((i) => i.projectId === projectId && !i.accepted);
@@ -187,81 +189,42 @@ const Project: React.FC = () => {
           >
             Teams
           </Tabs.Trigger>
+          <Tabs.Trigger
+            value="tab3"
+            className="p-3 border-b-2 border-b-transparent data-[state=active]:border-b-blue-700"
+          >
+            Settings
+          </Tabs.Trigger>
         </Tabs.List>
-        <Tabs.Content value="tab1" className="py-2 flex flex-col gap-4">
+        <Tabs.Content value="tab1" className="py-2 flex flex-col gap-8">
           <div>
             <div className="text-xs text-gray-500 font-bold">Name</div>
-            <div contentEditable={editing} id="projectName">
-              {project.name}
-            </div>
+            <div>{project.name}</div>
           </div>
           <div>
-            <div className="text-xs text-gray-500 font-bold">Owner</div>
+            <div className="text-xs text-gray-500 font-bold mb-2">Owner</div>
             <MemberCard memberId={project.ownerId} />
           </div>
           <div>
-            <div className="text-xs text-gray-500 font-bold">Members</div>
+            <div className="text-xs text-gray-500 font-bold mb-2">Members</div>
             <div>
               {membersInTheProject.map((member) => (
                 <div className="flex items-center p-2 rounded odd:bg-gray-200">
-                  <div className='grow'><MemberCard memberId={member.id} /></div>
-                  <div>Enrolled</div>
+                  <div className="grow">
+                    <MemberCard memberId={member.id} />
+                  </div>
+                  <div className="text-gray-800">Enrolled</div>
                 </div>
               ))}
               {unenrolledMembers.map((member) => (
                 <div className="flex items-center p-2 rounded odd:bg-gray-200">
-                  <div className='grow'><MemberCard memberId={member.id} /></div>
-                  <div>Invited</div>
+                  <div className="grow">
+                    <MemberCard memberId={member.id} />
+                  </div>
+                  <div className="text-gray-800">Invited</div>
                 </div>
               ))}
             </div>
-          </div>
-          <div className="flex gap-2">
-            {editing ? (
-              <>
-                <button
-                  onClick={() => {
-                    setEditing(false);
-                  }}
-                  className="border-[1px] border-black rounded py-1 px-4 hover:bg-gray-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => {
-                    if (!connected) return;
-                    socket.emit('projects:delete', { id: project.id }, (response) =>
-                      console.log(response)
-                    );
-                  }}
-                  className="border-[1px] border-red-600 bg-red-600 text-white rounded py-1 px-4 hover:bg-red-700"
-                >
-                  Delete
-                </button>
-                <button
-                  onClick={() => {
-                    setEditing(false);
-                    const name = document.getElementById('projectName')?.innerText;
-                    if (!name || !connected) return;
-                    socket.emit('projects:update', { id: project.id, name }, (response) =>
-                      console.log(response)
-                    );
-                  }}
-                  className="border-[1px] border-blue-600 bg-blue-600 text-white rounded py-1 px-4 hover:bg-blue-700"
-                >
-                  Save
-                </button>
-              </>
-            ) : (
-              <button
-                onClick={() => {
-                  setEditing(true);
-                }}
-                className="border-[1px] border-blue-600 bg-blue-600 text-white rounded py-1 px-4 hover:bg-blue-700"
-              >
-                Edit
-              </button>
-            )}
           </div>
         </Tabs.Content>
         <Tabs.Content value="tab2">
@@ -280,6 +243,52 @@ const Project: React.FC = () => {
                 This project has no teams yet. Create one and start working! &#128521;
               </div>
             )}
+          </div>
+        </Tabs.Content>
+        <Tabs.Content value="tab3" className="flex flex-col gap-8">
+          <div className="flex flex-col items-start">
+            <label htmlFor="projectName" className="font-medium">
+              Project name
+            </label>
+            <div>
+              <input
+                type="text"
+                id="projectName"
+                className="outline-none border-[1px] border-gray-300 rounded p-2 focus:shadow-[0px_0px_0px_3px] focus:shadow-blue-300 focus:border-blue-600"
+                value={projectName}
+                onChange={(e) => {
+                  setProjectName(e.target.value);
+                }}
+              />
+              <button
+                className="bg-blue-600 px-4 py-2 rounded text-white ml-2"
+                onClick={() => {
+                  socket.emit('projects:update', { id: projectId, name: projectName }, (res) => {
+                    console.log(res);
+                  });
+                }}
+              >
+                Rename
+              </button>
+            </div>
+          </div>
+          <div className="border-[1px] border-red-600 rounded p-2 flex flex-col gap-4">
+            <div>
+              <div className="font-medium">Delete this project</div>
+              <div>
+                Warning: this action will delete permanently this project, its teams and tasks.
+              </div>
+            </div>
+            <button
+              className="px-4 py-2 rounded border-red-600 border-[1px] text-red-600 self-start hover:bg-red-600 hover:text-white"
+              onClick={() => {
+                socket.emit("projects:delete", { id: projectId }, (res) => {
+                  console.log(res)
+                })
+              }}
+            >
+              Delete project
+            </button>
           </div>
         </Tabs.Content>
       </Tabs.Root>
