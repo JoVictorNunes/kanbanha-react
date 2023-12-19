@@ -40,7 +40,7 @@ const SignIn: React.FC = () => {
         }}
       >
         {({ isSubmitting }) => (
-          <Form className="flex flex-col gap-4">
+          <Form className="flex flex-col gap-4 w-1/2 md:w-1/3">
             <div className="flex flex-col">
               <label htmlFor="email">Email</label>
               <Field name="email">

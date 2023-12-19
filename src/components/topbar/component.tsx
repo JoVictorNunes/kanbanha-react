@@ -29,6 +29,10 @@ const Topbar: React.FC = () => {
     },
   ];
 
+  const memberInvites = Object.values(invites).filter(
+    (invite) => invite.memberId === currentMember?.id
+  );
+
   return (
     <div
       className={`h-16 px-6 pt-6 flex items-center gap-3 text-sm text-gray-500 justify-end absolute`}
@@ -67,8 +71,8 @@ const Topbar: React.FC = () => {
             sideOffset={5}
           >
             <div className="flex flex-col gap-2.5">
-              {Object.values(invites).length > 0 ? (
-                Object.values(invites).map((invite) => {
+              {memberInvites.length > 0 ? (
+                memberInvites.map((invite) => {
                   return (
                     <div
                       key={invite.id}
