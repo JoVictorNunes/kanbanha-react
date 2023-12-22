@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { ErrorMessage, Field, Form, Formik, FieldProps } from 'formik';
 import { Link } from 'react-router-dom';
 import * as Yup from 'yup';
@@ -8,6 +8,7 @@ import { signUp } from '@/api';
 
 const SignUp: React.FC = () => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const redirectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const renderConfirmDialog = () => {
     return (
@@ -33,15 +34,19 @@ const SignUp: React.FC = () => {
               </svg>
             </AlertDialog.Title>
             <AlertDialog.Description className="mt-4 mb-5 font-light leading-normal">
-              Welcome to Kanbanha! Go to the sign in page and start using your new account. ;)
+              You will be redirect to the home page.
             </AlertDialog.Description>
             <div className="flex justify-end gap-[25px]">
               <AlertDialog.Action asChild>
                 <button
-                  onClick={() => setShowConfirmDialog(false)}
+                  onClick={() => {
+                    setShowConfirmDialog(false);
+                    if (redirectTimeoutRef.current) clearTimeout(redirectTimeoutRef.current);
+                    window.location.pathname = '/';
+                  }}
                   className="bg-blue-700 text-white hover:bg-blue-800 focus:shadow-blue-800 inline-flex items-center justify-center rounded-[4px] px-4 py-2 font-medium leading-none outline-none focus:shadow-[0_0_0_2px]"
                 >
-                  OK
+                  Don't wait!
                 </button>
               </AlertDialog.Action>
             </div>
@@ -83,7 +88,12 @@ const SignUp: React.FC = () => {
           const response = await signUp(email, name, role, password);
           const body = await response.json();
           if (response.status === 201) {
+            const { token } = body;
             setShowConfirmDialog(true);
+            localStorage.setItem('token', token);
+            redirectTimeoutRef.current = setTimeout(() => {
+              window.location.pathname = '/';
+            }, 5000);
           } else {
             const { message } = body;
             setFieldError('password', message);
