@@ -57,8 +57,8 @@ const Account: React.FC = () => {
       })}
       onSubmit={async (values, { setSubmitting, setFieldError }) => {
         if (!connected) return;
-        const { email, name, role } = values;
-        socket.emit('members:update', { email, name, role }, (response) => {
+        const { name, role } = values;
+        socket.emit('members:update', { name, role }, (response) => {
           if (response.code === 201) {
             toast.success('Changes saved!');
           } else {
@@ -86,7 +86,7 @@ const Account: React.FC = () => {
                 {({ field }: FieldProps) => (
                   <input
                     {...field}
-                    disabled={isSubmitting}
+                    disabled
                     type="email"
                     className={`${fieldStaticStyles}`}
                   />
