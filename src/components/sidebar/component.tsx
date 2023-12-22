@@ -23,7 +23,7 @@ const Navbar: React.FC = () => {
 
   return (
     <div
-      className={`flex absolute`}
+      className={`flex absolute overflow-hidden`}
       style={{
         height: layout.sidebar.height,
         width: layout.sidebar.width,
